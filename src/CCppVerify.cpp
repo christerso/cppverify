@@ -1,4 +1,16 @@
-#include "CcppVerify.h"
+#include "CCppVerify.h"
 
-// TODO: your implementation here
+CCppVerify::CCppVerify()
+{
+}
 
+// Destructor implementation
+CCppVerify::~CCppVerify()
+{
+}
+
+
+int main(int argc, char** argv)
+{
+    return 0;
+}
