@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 SET(CPPVERIFY_SOURCE
-  CCppVerify.cpp
-  CCppVerify.h
-  )
+	cppverify.cc
+	cppverify.h
+	fileloader.cc
+	fileloader.h
+	)
 
 SET(CPPVERIFY_MODULES ${PROJECT_SOURCE_DIR}/cmake_modules)
 MESSAGE(STATUS "Local module path: " ${CPPVERIFY_MODULES})

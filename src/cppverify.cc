@@ -1,4 +1,4 @@
-#include "CCppVerify.h"
+#include "cppverify.h"
 
 CCppVerify::CCppVerify()
 {
