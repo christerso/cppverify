@@ -12,5 +12,5 @@
 
 bool CFileLoader::loadFile(const std::string& filename, bool useCache)
 {
-    return true;
+	return true;
 }
