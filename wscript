@@ -60,16 +60,3 @@ def build(bld):
 			includes = './src /usr/include',
 			cxxflags = [ '-static', '-Wall', '-pedantic', '-std=c++0x', ]
 		)
-
-	# 2. A simple static library
-	#bld(
-		#features = 'cc cstaticlib',
-		#source = 'test_staticlib.c',
-		#target='my_static_lib')
-
-	# note: the syntax bld(...) is equivalent to bld.new_task_gen(...)
-	#       instantiates and object of the class task_gen (from the file TaskGen.py)
-
-	# if we had a subfolder we would add the following:
-	#bld.add_subdirs('src')
-
