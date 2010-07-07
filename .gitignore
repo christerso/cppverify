@@ -2,3 +2,4 @@ build
 \.gitignore
 *.vp*
 *.vtg
+.lock-wscript
