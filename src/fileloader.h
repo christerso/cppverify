@@ -1,8 +1,14 @@
 #ifndef __FILELOADER_H_INCL__
 #define __FILELOADER_H_INCL__
 
+// Standard C++ includes
 #include <string>
 #include <fstream>
+
+// Boost includes
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp> 
+#include <boost/filesystem/operations.hpp>
 
 class CFileLoader
 {
