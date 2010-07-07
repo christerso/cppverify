@@ -20,7 +20,7 @@ public:
      * 
      * @return True or false
      */
-    bool loadFile(const std::string& filename, bool useCache);
+    bool loadFile(const std::string& path, const std::string& filename, bool useCache);
 private:
     void cacheFile();
     void saveCache();
