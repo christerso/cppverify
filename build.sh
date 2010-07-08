@@ -1,3 +1,3 @@
 #!/bin/bash
-./waf configure && ./waf
+./waf configure && ./waf && doxygen doxyconf
 
