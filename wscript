@@ -16,25 +16,29 @@ top = '.'
 out = 'build'
 
 def _run_cppcheck(bld):
-	for lib in bld.all_task_gen:
-		for source_file in Utils.to_list(lib.source):
-			cmd = '%s %s' % (
-					bld.env['CPPCHECK'],
-					os.path.join(lib.path.abspath(), source_file)
-				)
-			Utils.pproc.Popen(cmd, shell=True).wait()
+	if bld.env['CPPCHECK']:
+		for lib in bld.all_task_gen:
+			for source_file in Utils.to_list(lib.source):
+				cmd = '%s %s' % (
+						bld.env['CPPCHECK'],
+						os.path.join(lib.path.abspath(), source_file)
+					)
+				Utils.pproc.Popen(cmd, shell=True).wait()
 
 def _run_astyle(bld):
-	for lib in bld.all_task_gen:
-		for source_file in Utils.to_list(lib.source):
-			cmd = '%s --style=k/r --indent=tab -n -q %s' % (
-					bld.env['ASTYLE'],
-					os.path.join(lib.path.abspath(), source_file)
-				)
-			Utils.pproc.Popen(cmd, shell=True).wait()
+	if bld.env['ASTYLE']:
+		for lib in bld.all_task_gen:
+			for source_file in Utils.to_list(lib.source):
+				cmd = '%s --style=k/r --indent=tab -n -q %s' % (
+						bld.env['ASTYLE'],
+						os.path.join(lib.path.abspath(), source_file)
+					)
+				Utils.pproc.Popen(cmd, shell=True).wait()
 
 def _run_doxygen( bld ):
-	Utils.pproc.Popen( 'doxygen ./doxyconf', shell=True ).wait()
+	if bld.env['DOXYGEN']:
+		Utils.pproc.Popen( '%s ./doxyconf' % bld.env['DOXYGEN'],
+				shell=True ).wait()
 
 def set_options(opt):
 	opt.tool_options('compiler_cxx')
@@ -50,6 +54,7 @@ def configure(conf):
 	conf.find_program('cppcheck', var='CPPCHECK')
 	conf.find_program('astyle', var='ASTYLE')
 	conf.find_program('doxygen', var='DOXYGEN')
+	conf.find_program('dot', var='dot')
 	conf.find_program('ctags', var='CTAGS')
 
 def build(bld):
