@@ -40,7 +40,9 @@ def set_options(opt):
 
 def configure(conf):
 	conf.check_tool('compiler_cxx')
-	conf.check_cxx(lib='PocoFoundation', uselib_store='PocoFoundation', mandatory=True)
+	conf.check_cxx(lib='boost_filesystem', uselib_store='boost_filesystem', mandatory=True)
+	conf.check_cxx(lib='boost_regex', uselib_store='boost_regex', mandatory=True)
+	conf.check_cxx(lib='boost_system', uselib_store='boost_system', mandatory=True)
 
 	conf.find_program('cppcheck', var='CPPCHECK')
 	conf.find_program('astyle', var='ASTYLE')
@@ -56,7 +58,7 @@ def build(bld):
 			features = 'cxx cprogram',
 			source = bld.path.ant_glob('**/*.cc'),
 			target = APPNAME,
-			uselib = 'PocoFoundation',
+			uselib = [ 'boost_filesystem', 'boost_regex', 'boost_system' ],
 			includes = './src /usr/include',
 			cxxflags = [ '-static', '-Wall', '-pedantic', '-std=c++0x', ]
 		)
