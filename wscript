@@ -29,7 +29,7 @@ def _run_astyle(bld):
 	if bld.env['ASTYLE']:
 		for lib in bld.all_task_gen:
 			for source_file in Utils.to_list(lib.source):
-				cmd = '%s --style=k/r --indent=tab -n -q %s' % (
+				cmd = '%s --style=kr --indent=tab -n -q %s' % (
 						bld.env['ASTYLE'],
 						os.path.join(lib.path.abspath(), source_file)
 					)
