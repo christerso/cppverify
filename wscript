@@ -33,6 +33,9 @@ def _run_astyle(bld):
 				)
 			Utils.pproc.Popen(cmd, shell=True).wait()
 
+def _run_doxygen( bld ):
+	Utils.pproc.Popen( 'doxygen ./doxyconf', shell=True ).wait()
+
 def set_options(opt):
 	opt.tool_options('compiler_cxx')
 
@@ -46,6 +49,7 @@ def configure(conf):
 
 	conf.find_program('cppcheck', var='CPPCHECK')
 	conf.find_program('astyle', var='ASTYLE')
+	conf.find_program('doxygen', var='DOXYGEN')
 	conf.find_program('ctags', var='CTAGS')
 
 def build(bld):
@@ -53,6 +57,7 @@ def build(bld):
 		bld.add_pre_fun(_run_cppcheck)
 
 	bld.add_pre_fun(_run_astyle)
+	bld.add_post_fun(_run_doxygen)
 
 	bld.new_task_gen(
 			features = 'cxx cprogram',
@@ -62,3 +67,4 @@ def build(bld):
 			includes = './src /usr/include',
 			cxxflags = [ '-static', '-Wall', '-pedantic', '-std=c++0x', ]
 		)
+

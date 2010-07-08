@@ -3,3 +3,4 @@ build
 *.vp*
 *.vtg
 .lock-wscript
+docs
