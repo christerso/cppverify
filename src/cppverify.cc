@@ -1,13 +1,16 @@
 #include "cppverify.h"
 
-CCppVerify::CCppVerify() {
+CCppVerify::CCppVerify()
+{
 }
 
 // Destructor implementation
-CCppVerify::~CCppVerify() {
+CCppVerify::~CCppVerify()
+{
 }
 
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
 	return 0;
 }
