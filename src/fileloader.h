@@ -1,5 +1,5 @@
-#ifndef __FILELOADER_H_INCL__
-#define __FILELOADER_H_INCL__
+#ifndef FILELOADER_H_INCL__
+#define FILELOADER_H_INCL__
 
 // Standard C++ includes
 #include <string>
@@ -28,5 +28,5 @@ private:
     std::ifstream _fs;
 };
 
-#endif // __FILELOADER_H_INCL__
+#endif // FILELOADER_H_INCL__
 

@@ -1,6 +1,5 @@
-#ifndef __CPPVERIFY_COMMON_H__
-#define __CPPVERIFY_COMMON_H__
+#ifndef CPPVERIFY_COMMON_H__
+#define CPPVERIFY_COMMON_H__
 
 
-#endif // __CPPVERIFY_COMMON_H__
-
+#endif // CPPVERIFY_COMMON_H__
