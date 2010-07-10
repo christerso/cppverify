@@ -37,7 +37,19 @@ def _run_astyle(bld):
 
 def _run_doxygen( bld ):
 	if bld.env['DOXYGEN']:
-		Utils.pproc.Popen( '%s ./doxyconf' % bld.env['DOXYGEN'],
+		doxy_dict = {
+				'project_name': APPNAME,
+				'output_directory': os.path.join( bld.bdir, 'default/docs' ),
+				'warn_logfile': os.path.join( bld.bdir, 'default/doxygen.log' ),
+			}
+		doxy_config_content = Utils.readf( './doxyconf.in' ) % doxy_dict
+		doxy_config_fname = os.path.join( bld.bdir, 'default/doxygen.conf' )
+
+		doxy_config = open( doxy_config_fname, 'w' )
+		doxy_config.write( doxy_config_content )
+		doxy_config.close()
+		
+		Utils.pproc.Popen( '%s %s' % ( bld.env['DOXYGEN'], doxy_config_fname ),
 				shell=True ).wait()
 
 def set_options(opt):
