@@ -1,6 +1,9 @@
 // std
 #include <iostream>
 
+// boost
+#include <boost/foreach.hpp>
+
 #include "common.h"
 #include "check.h"
 
@@ -17,11 +20,11 @@ int main(int argc, char** argv)
 
 	// Loop over all files and check them for warnings/errors
 	std::vector<result_t> results;
-	for ( std::vector<file_t>::iterator iter = files.begin(); iter != files.end(); iter++ ) {
-		warnings_t warnings = check( *iter );
+	BOOST_FOREACH( file_t file, files ) {
+		warnings_t warnings = check( file );
 
 		if ( !warnings->empty() ) {
-			results.push_back( result_t( *iter, warnings ) );
+			results.push_back( result_t( file, warnings ) );
 		}
 	}
 
