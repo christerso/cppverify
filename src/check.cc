@@ -2,9 +2,9 @@
 
 using namespace cppverify;
 
-warnings_t cppverify::check( file_t )
+p_warnings_t cppverify::check( p_file_t file )
 {
-	warnings_t warnings( new std::vector<warning_t>() );
+	p_warnings_t warnings( new warnings_t );
 
 	return warnings;
 }

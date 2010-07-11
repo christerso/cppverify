@@ -16,20 +16,20 @@ int main(int argc, char** argv)
 	// TODO Init options
 
 	// TODO Get files to check
-	std::vector<file_t> files; // Change to shared_ptr on vector?
+	files_t files; // Change to shared_ptr on vector?
 
 	// Loop over all files and check them for warnings/errors
-	std::vector<result_t> results;
-	BOOST_FOREACH( file_t file, files ) {
-		warnings_t warnings = check( file );
+	p_results_t results( new results_t );
+	BOOST_FOREACH( p_file_t file, files ) {
+		p_warnings_t warnings = check( file );
 
 		if ( !warnings->empty() ) {
-			results.push_back( result_t( file, warnings ) );
+			results->push_back( p_result_t( new result_t( file, warnings ) ) );
 		}
 	}
 
 	// Present the result
-	if ( !results.empty() ) {
+	if ( !results->empty() ) {
 		// TODO Present/Generate result
 
 		// TODO if retval should be none zero when any warning are found, add it here
