@@ -11,8 +11,8 @@ bool CFileLoader::loadFile(const std::string& path, const std::string& filename,
 {
 	boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
 	for ( boost::filesystem::directory_iterator itr(path);
-	        itr != end_itr;
-	        ++itr ) {
+	          itr != end_itr;
+	          ++itr ) {
 		if ( is_directory(itr->status()) ) {
 		}
 	}
