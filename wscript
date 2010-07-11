@@ -62,6 +62,10 @@ def configure(conf):
 	conf.check_cxx(lib='boost_filesystem', uselib_store='boost_filesystem', mandatory=True)
 	conf.check_cxx(lib='boost_regex', uselib_store='boost_regex', mandatory=True)
 	conf.check_cxx(lib='boost_system', uselib_store='boost_system', mandatory=True)
+	conf.check_cfg(package='libglog', args='--cflags --libs',
+			uselib_store='glog', mandatory=True)
+	conf.check_cfg(package='libgtest', args='--cflags --libs',
+			uselib_store='gtest', mandatory=False)
 
 	conf.find_program('cppcheck', var='CPPCHECK')
 	conf.find_program('astyle', var='ASTYLE')
@@ -80,8 +84,9 @@ def build(bld):
 			features = 'cxx cprogram',
 			source = bld.path.ant_glob('**/*.cc'),
 			target = APPNAME,
-			uselib = [ 'boost_filesystem', 'boost_regex', 'boost_system' ],
+			uselib = [ 'boost_filesystem', 'boost_regex', 'boost_system',
+				'glog', ],
 			includes = './src /usr/include',
-			cxxflags = [ '-static', '-Wall', '-pedantic', '-std=c++0x', ]
+			cxxflags = [ '-g', '-static', '-Wall', '-pedantic', '-std=c++0x', ]
 		)
 
