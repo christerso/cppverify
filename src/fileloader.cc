@@ -1,21 +1,59 @@
+// Own includes
 #include "fileloader.h"
+
+// Boost includes
+#include <boost/filesystem/operations.hpp>
+#include <boost/exception.hpp>
 
 // Standard C++
 #include <string>
+#include <ctime>
+#include <vector>
+#include <map>
 
-// Standard C
-// Unfortunally these are needed as long as we don't use a third-party C++ library or similar.
-// There simply is no way to grab last midified date time with the C++ headers.
+// Google
+#include <glog/logging.h>
 
-bool CFileLoader::loadFile(const std::string& path, const std::string& filename, bool useCache)
+using namespace cppverify;
+
+bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, files_t& file_list, bool use_cache)
 {
+	if ( !boost::filesystem::exists(dir_path) ) {
+		return false;
+	}
 	boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
-	for ( boost::filesystem::directory_iterator itr(path);
-	          itr != end_itr;
-	          ++itr ) {
-		if ( is_directory(itr->status()) ) {
+	try {
+		for ( boost::filesystem::directory_iterator itr(dir_path); itr != end_itr; ++itr ) {
+			if ( is_directory(itr->status()) ) {
+				// For each directory, call ourselves and repeat the scan
+				scan_dirs( itr->path(), file_list, use_cache );
+			} else {
+				std::string full_name = itr->path().string();
+				if ( use_cache ) {
+					std::time_t time_modified = boost::filesystem::last_write_time(full_name);
+					if (_file_cache.insert(std::map<std::string, time_t>::value_type(full_name, time_modified)).second) {
+						// Insert succeeded
+						DLOG(INFO) << "Added: " << full_name;
+					} else {
+						// we already have this value in the cache, replace the value in this key if timestamps differ
+						DLOG(INFO) << "Found: " << full_name;
+						DLOG(INFO) << "Checking time modified";
+						if ( _file_cache[full_name] != time_modified ) {
+							_file_cache.erase(full_name);
+							file_list.push_back(full_name);
+						}
+					}
+				} else {
+					// No cache always append
+					DLOG(INFO) << "(NOCACHE) Added: " << full_name;
+					file_list.push_back(full_name);
+				}
+			}
 		}
+	} catch ( boost::exception& x ) {
+		DLOG(ERROR) << "Permission Denied";
 	}
 
 	return true;
 }
+

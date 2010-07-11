@@ -3,9 +3,15 @@
 
 // std
 #include <vector>
+#include <string>
+#include <ctime>
+#include <map>
 
 // boost
 #include <boost/shared_ptr.hpp>
+
+// google
+#include <glog/logging.h>
 
 namespace cppverify {
 
@@ -14,10 +20,9 @@ class Warning
 };
 
 typedef std::string file_t;
-typedef boost::shared_ptr<file_t> p_file_t;
+typedef std::vector<file_t> files_t;
 
-typedef std::vector<p_file_t> files_t;
-typedef boost::shared_ptr<files_t> p_files_t;
+typedef std::map<std::string, time_t> cache_t;
 
 typedef Warning warning_t;
 typedef boost::shared_ptr<warning_t> p_warning_t;
@@ -25,7 +30,7 @@ typedef boost::shared_ptr<warning_t> p_warning_t;
 typedef std::vector<p_warning_t> warnings_t;
 typedef boost::shared_ptr<warnings_t> p_warnings_t;
 
-typedef std::pair<p_file_t,p_warnings_t> result_t;
+typedef std::pair<file_t,p_warnings_t> result_t;
 typedef boost::shared_ptr<result_t> p_result_t;
 
 typedef std::vector<p_result_t> results_t;
