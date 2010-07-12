@@ -39,7 +39,7 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, files_t& fil
 						DLOG(INFO) << "Found: " << full_name;
 						DLOG(INFO) << "Checking time modified";
 						if ( _file_cache[full_name] != time_modified ) {
-							_file_cache.erase(full_name);
+							_file_cache[full_name] = time_modified;
 							file_list.push_back(full_name);
 						}
 					}

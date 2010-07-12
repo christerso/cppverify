@@ -3,7 +3,8 @@
 
 // boost
 #include <boost/foreach.hpp>
-
+#include <boost/program_options.hpp>
+#include <boost/program_options/options_description.hpp>
 #include "common.h"
 #include "check.h"
 
@@ -19,13 +20,12 @@ int main(int argc, char** argv)
 	// Init google logging
 	google::InitGoogleLogging(argv[0]);
 
-	files_t filelist;
-	FileLoader fl;
-	boost::filesystem::path my_path( "./" );
-	fl.scan_dirs(my_path, filelist);
 	// TODO Get files to check
 	files_t files; // Change to shared_ptr on vector?
 
+	FileLoader fl;
+	std::string scanpath(".");
+	fl.scan_dirs(scanpath, files);
 	// Loop over all files and check them for warnings/errors
 	p_results_t results( new results_t );
 	BOOST_FOREACH( file_t file, files ) {

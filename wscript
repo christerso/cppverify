@@ -59,6 +59,7 @@ def set_options(opt):
 
 def configure(conf):
 	conf.check_tool('compiler_cxx')
+	conf.check_cxx(lib='boost_program_options', uselib_store='boost_program_options', mandatory=True)
 	conf.check_cxx(lib='boost_filesystem', uselib_store='boost_filesystem', mandatory=True)
 	conf.check_cxx(lib='boost_regex', uselib_store='boost_regex', mandatory=True)
 	conf.check_cxx(lib='boost_system', uselib_store='boost_system', mandatory=True)
@@ -66,7 +67,6 @@ def configure(conf):
 			uselib_store='glog', mandatory=True)
 	conf.check_cfg(package='libgtest', args='--cflags --libs',
 			uselib_store='gtest', mandatory=False)
-
 	conf.find_program('cppcheck', var='CPPCHECK')
 	conf.find_program('astyle', var='ASTYLE')
 	conf.find_program('doxygen', var='DOXYGEN')
@@ -84,7 +84,7 @@ def build(bld):
 			features = 'cxx cprogram',
 			source = bld.path.ant_glob('**/*.cc'),
 			target = APPNAME,
-			uselib = [ 'boost_filesystem', 'boost_regex', 'boost_system',
+			uselib = [ 'boost_program_options', 'boost_filesystem', 'boost_regex', 'boost_system',
 				'glog', ],
 			includes = './src /usr/include',
 			cxxflags = [ '-g', '-static', '-Wall', '-pedantic', '-std=c++0x', ]
