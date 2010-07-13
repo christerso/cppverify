@@ -17,7 +17,7 @@ using namespace cppverify;
 
 void FileLoader::run_scan(std::vector<std::string>& file_paths, files_t& file_list, bool use_cache)
 {
-	for ( size_t i; i < file_paths.size(); i++ ) {
+	for ( size_t i = 0; i < file_paths.size(); i++ ) {
 		boost::filesystem::path scan_path(file_paths[i]);
 		scan_dirs(scan_path, file_list, use_cache);
 	}
@@ -29,8 +29,8 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, files_t& fil
 		return false;
 	}
 	boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
-	try {
-		for ( boost::filesystem::directory_iterator itr(dir_path); itr != end_itr; ++itr ) {
+	for ( boost::filesystem::directory_iterator itr(dir_path); itr != end_itr; ++itr ) {
+		try {
 			if ( is_directory(itr->status()) ) {
 				// For each directory, call ourselves and repeat the scan
 				scan_dirs( itr->path(), file_list, use_cache );
@@ -40,11 +40,11 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, files_t& fil
 					std::time_t time_modified = boost::filesystem::last_write_time(full_name);
 					if (_file_cache.insert(std::map<std::string, time_t>::value_type(full_name, time_modified)).second) {
 						// Insert succeeded
-						DLOG(INFO) << "Added: " << full_name;
+						LOG(INFO) << "Added: " << full_name;
 					} else {
 						// we already have this value in the cache, replace the value in this key if timestamps differ
-						DLOG(INFO) << "Found: " << full_name;
-						DLOG(INFO) << "Checking time modified";
+						LOG(INFO) << "Found: " << full_name;
+						LOG(INFO) << "Checking time modified";
 						if ( _file_cache[full_name] != time_modified ) {
 							_file_cache[full_name] = time_modified;
 							file_list.push_back(full_name);
@@ -52,15 +52,14 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, files_t& fil
 					}
 				} else {
 					// No cache always append
-					DLOG(INFO) << "(NOCACHE) Added: " << full_name;
+					LOG(INFO) << "(NOCACHE) Added: " << full_name;
 					file_list.push_back(full_name);
 				}
 			}
+		} catch ( boost::exception& x ) {
+			DLOG(ERROR) << "Permission Denied";
 		}
-	} catch ( boost::exception& x ) {
-		DLOG(ERROR) << "Permission Denied";
 	}
-
 	return true;
 }
 

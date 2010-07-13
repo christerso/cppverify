@@ -19,7 +19,7 @@ namespace cppverify {
 class FileLoader
 {
 public:
-	void run_scan(std::vector<std::string>& file_paths, files_t& file_list, bool use_cache);
+	void run_scan(std::vector<std::string>& file_paths, files_t& file_list, bool use_cache = true);
 	/**
 	 * Loading a file fills the cache array containing the file modified timestamp and the filename
 	 * 

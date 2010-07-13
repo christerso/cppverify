@@ -45,15 +45,21 @@ int main(int argc, char** argv)
 		return retval;
 	}
 
+	files_t files; // Change to shared_ptr on vector?
+
+	// TODO: Add proper option parsing we should be able to toggle cache or not
+	// Add fileextension optins
+	// Add depth of scan
+
 	if (vm.count("include-path")) {
-		std::cout << "Input files:" << std::endl;
+		std::cout << "Including paths:" << std::endl;
 		std::vector<std::string> res = vm["include-path"].as<std::vector<std::string> >();
 		for (size_t i = 0; i < res.size(); i++) {
 			std::cout << res[i] << std::endl;
 		}
+		fl.run_scan(res, files);
 	}
-	// TODO Get files to check
-	files_t files; // Change to shared_ptr on vector?
+
 
 //  std::string scanpath(".");
 //  fl.scan_dirs(scanpath, files);
