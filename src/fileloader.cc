@@ -3,8 +3,7 @@
 
 // Boost includes
 #include <boost/filesystem/operations.hpp>
-#include <boost/exception.hpp>
-
+#include <boost/exception/all.hpp>
 // Standard C++
 #include <string>
 #include <ctime>
@@ -15,6 +14,14 @@
 #include <glog/logging.h>
 
 using namespace cppverify;
+
+void FileLoader::run_scan(std::vector<std::string>& file_paths, files_t& file_list, bool use_cache)
+{
+	for ( size_t i; i < file_paths.size(); i++ ) {
+		boost::filesystem::path scan_path(file_paths[i]);
+		scan_dirs(scan_path, file_list, use_cache);
+	}
+}
 
 bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, files_t& file_list, bool use_cache)
 {

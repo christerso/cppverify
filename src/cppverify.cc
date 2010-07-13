@@ -1,5 +1,8 @@
 // std
 #include <iostream>
+#include <vector>
+#include <string>
+#include <map>
 
 // boost
 #include <boost/foreach.hpp>
@@ -11,22 +14,50 @@
 // own
 #include "fileloader.h"
 
+// Not pulling the namespace in, instead shortening the name of it
+namespace po = boost::program_options;
+
 using namespace cppverify;
 
 int main(int argc, char** argv)
 {
 	int retval = 0;
 
-	// Init google logging
+	//Init google logging
 	google::InitGoogleLogging(argv[0]);
 
+	FileLoader fl;
+
+	// Preparing boost command line options
+	po::options_description desc("Allowed options");
+	desc.add_options()
+	("help,h", "show help on commands")
+	("include-path,I", po::value<std::vector<std::string> >(), "paths to scan for files");
+
+	po::positional_options_description p;
+	p.add("include-path", -1);
+	po::variables_map vm;
+	po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+	po::notify(vm);
+
+	if (vm.count("help")) {
+		std::cout << desc << std::endl;
+		return retval;
+	}
+
+	if (vm.count("include-path")) {
+		std::cout << "Input files:" << std::endl;
+		std::vector<std::string> res = vm["include-path"].as<std::vector<std::string> >();
+		for (size_t i = 0; i < res.size(); i++) {
+			std::cout << res[i] << std::endl;
+		}
+	}
 	// TODO Get files to check
 	files_t files; // Change to shared_ptr on vector?
 
-	FileLoader fl;
-	std::string scanpath(".");
-	fl.scan_dirs(scanpath, files);
-	// Loop over all files and check them for warnings/errors
+//  std::string scanpath(".");
+//  fl.scan_dirs(scanpath, files);
+//  // Loop over all files and check them for warnings/errors
 	p_results_t results( new results_t );
 	BOOST_FOREACH( file_t file, files ) {
 		p_warnings_t warnings = check( file );
@@ -46,5 +77,6 @@ int main(int argc, char** argv)
 		// XXX Should an empty xml file be generated in this case?
 	}
 
+	google::ShutdownGoogleLogging();
 	return retval;
 }
