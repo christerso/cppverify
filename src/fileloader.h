@@ -35,7 +35,7 @@ private:
     void cache_file();
     void save_cache();
 private: 
-    cppverify::cache_t _file_cache;
+    cache_t _file_cache;
 };
 }
 #endif // FILELOADER_H_INCL__
