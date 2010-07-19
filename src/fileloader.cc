@@ -4,7 +4,11 @@
 // Boost includes
 #include <boost/filesystem/operations.hpp>
 #include <boost/exception/all.hpp>
+#include <boost/filesystem.hpp>
+
 // Standard C++
+#include <iostream>
+#include <fstream>
 #include <string>
 #include <ctime>
 #include <vector>
@@ -20,6 +24,33 @@ void FileLoader::run_scan(std::vector<std::string>& file_paths, files_t& file_li
 	for ( size_t i = 0; i < file_paths.size(); i++ ) {
 		boost::filesystem::path scan_path(file_paths[i]);
 		scan_dirs(scan_path, file_list, use_cache);
+	}
+	// Now save the cache
+	DLOG(INFO) << "Number of files found:" << file_list.size();
+	save_cache(file_list);
+}
+
+void FileLoader::save_cache(const files_t& file_list)
+{
+	// boost::filesystem::path cache(CACHE_PATH);
+	std::string fullpath(CACHE_PATH);
+	fullpath.append("/");
+	fullpath.append(CACHE_FILE);
+	// try {
+	// 	if ( !boost::filesystem::exists(cache) ) {
+	// 		// Create the file path if it does not exist
+	// 		// boost::filesystem::create_directory(cache);
+	// 	}
+	// } catch (boost::exception& x) {
+	// 	LOG(WARNING) << "Unable to save cachefile";
+	// 	return;
+	// }
+	std::ofstream outfile(fullpath.c_str());
+	files_t::const_iterator it_pos = file_list.begin(), it_end = file_list.end();
+	LOG(INFO) << "Writing cache...";
+	while (it_pos != it_end) {
+		outfile << it_pos->c_str() << std::endl;
+		++it_pos;
 	}
 }
 

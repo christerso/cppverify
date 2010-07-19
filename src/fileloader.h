@@ -33,7 +33,7 @@ public:
     bool scan_dirs(const boost::filesystem::path& dir_path, files_t& file_list, bool use_cache = true);
 private:
     void cache_file();
-    void save_cache();
+    void save_cache(const files_t& file_list);
 private: 
     cache_t _file_cache;
 };

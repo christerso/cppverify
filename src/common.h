@@ -13,6 +13,10 @@
 // google
 #include <glog/logging.h>
 
+// defines
+#define CACHE_PATH "~/.cache"
+#define CACHE_FILE "cppverify"
+
 namespace cppverify {
 
 class Warning

@@ -33,35 +33,38 @@ enum headers_t
         H_STRING,
         H_TIME
     };
-   
+
 char* c99_headers[] = {
-{ "complex.h", "complex" },
-{ "inttypes.h", "cinttypes" },
-{ "stdint.h", "cstdint" },
-{ "fenv.h", "cfenv" },
-{ "stdbool.h", "cstdbool" },
-{ "tgmath.h", "ctgmath" } };
+    { "complex.h", "complex" },
+    { "inttypes.h", "cinttypes" },
+    { "stdint.h", "cstdint" },
+    { "fenv.h", "cfenv" },
+    { "stdbool.h", "cstdbool" },
+    { "tgmath.h", "ctgmath" }
+};
 
 char* c94_95_headers[] = {
-{ "iso646.h", "ciso646" },
-{ "wchar.h", "cwchar" },
-{ "wctype.h" "cwctype" } };
+    { "iso646.h", "ciso646" },
+    { "wchar.h", "cwchar" },
+    { "wctype.h" "cwctype" }
+};
 
 char* c89_90_headers[] = {
-{ "assert.h", "cassert" },
-{ "ctype.h", "cctype" },
-{ "errno.h", "cerrno" },
-{ "float.h", "cfloat" },
-{ "limits.h", "climits" },
-{ "locale.h", "clocale" },
-{ "math.h", "cmath" },
-{ "setjmp.h", "csetjmp" },
-{ "signal.h", "csignal" },
-{ "stdarg.h", "cstdarg" },
-{ "stddef.h", "cstddef" },
-{ "stdio.h", "cstdio" },
-{ "stdlib.h", "cstdlib" },
-{ "string.h", "cstring" },
-{ "time.h", "ctime" } };
+    { "assert.h", "cassert" },
+    { "ctype.h", "cctype" },
+    { "errno.h", "cerrno" },
+    { "float.h", "cfloat" },
+    { "limits.h", "climits" },
+    { "locale.h", "clocale" },
+    { "math.h", "cmath" },
+    { "setjmp.h", "csetjmp" },
+    { "signal.h", "csignal" },
+    { "stdarg.h", "cstdarg" },
+    { "stddef.h", "cstddef" },
+    { "stdio.h", "cstdio" },
+    { "stdlib.h", "cstdlib" },
+    { "string.h", "cstring" },
+    { "time.h", "ctime" }
+};
 
 #endif // CHEADERS_H__
