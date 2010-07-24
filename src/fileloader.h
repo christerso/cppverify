@@ -8,15 +8,12 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
 
-// Standard C++ includes
-#include <fstream>
-
 namespace cppverify {
 
 class FileLoader
 {
 public:
-	void run_scan(std::vector<std::string>& file_paths, files_t& file_list, bool use_cache = true);
+	void run_scan(std::vector<std::string>& file_paths, bool use_cache = true);
 	/**
 	 * Loading a file fills the cache array containing the file modified timestamp and the filename
 	 * 
@@ -27,11 +24,12 @@ public:
 	 * 
 	 * @return True or false
 	 */
-    bool scan_dirs(const boost::filesystem::path& dir_path, files_t& file_list, bool use_cache = true);
+    bool scan_dirs(const boost::filesystem::path& dir_path, bool use_cache = true);
 private:
     void cache_file();
     void save_cache(const files_t& file_list);
 private: 
+	files_t _file_list; // Complete filelist
     cache_t _file_cache;
 };
 }

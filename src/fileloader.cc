@@ -5,18 +5,24 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/exception/all.hpp>
 #include <boost/filesystem.hpp>
-
+#include <boost/lexical_cast.hpp>
 // Standard C++
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <ctime>
+#include <vector>
+#include <map>
+
+// Google
+#include <glog/logging.h>
 
 using namespace cppverify;
-
-void FileLoader::run_scan(std::vector<std::string>& file_paths, files_t& file_list, bool use_cache)
+void FileLoader::run_scan(std::vector<std::string>& file_paths, bool use_cache)
 {
 	for ( size_t i = 0; i < file_paths.size(); i++ ) {
 		boost::filesystem::path scan_path(file_paths[i]);
-		scan_dirs(scan_path, file_list, use_cache);
+		scan_dirs(scan_path, use_cache);
 	}
 	// Now save the cache
 	DLOG(INFO) << "Number of files found:" << file_list.size();
@@ -45,9 +51,32 @@ void FileLoader::save_cache(const files_t& file_list)
 		outfile << it_pos->c_str() << std::endl;
 		++it_pos;
 	}
+// Now save the cache
+	DLOG(INFO) << "Number of files cached:" << boost::lexical_cast<std::string>(_file_cache.size());
+	save_cache();
 }
 
-bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, files_t& file_list, bool use_cache)
+void FileLoader::save_cache()
+{
+	std::string fullpath(CACHE_PATH);
+	fullpath.append("/");
+	fullpath.append(CACHE_FILE);
+//    boost::filesystem::path fpath(fullpath);
+//    try {
+//        boost::filesystem::create_directory(fpath);
+//    } catch (boost::exception& x) {
+//        LOG(WARNING) << "Cache already exist, continuing";
+//    }
+	std::ofstream outfile(fullpath.c_str());
+	cache_t::const_iterator it_pos = _file_cache.begin(), it_end = _file_cache.end();
+	LOG(INFO) << "Writing cache...";
+	while (it_pos != it_end) {
+		outfile << it_pos->second << std::endl;
+		++it_pos;
+	}
+}
+
+bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, bool use_cache)
 {
 	if ( !boost::filesystem::exists(dir_path) ) {
 		return false;
@@ -57,7 +86,7 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, files_t& fil
 		try {
 			if ( is_directory(itr->status()) ) {
 				// For each directory, call ourselves and repeat the scan
-				scan_dirs( itr->path(), file_list, use_cache );
+				scan_dirs( itr->path(), use_cache );
 			} else {
 				std::string full_name = itr->path().string();
 				if ( use_cache ) {
@@ -71,13 +100,13 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, files_t& fil
 						LOG(INFO) << "Checking time modified";
 						if ( _file_cache[full_name] != time_modified ) {
 							_file_cache[full_name] = time_modified;
-							file_list.push_back(full_name);
+							_file_list.push_back(full_name);
 						}
 					}
 				} else {
 					// No cache always append
 					LOG(INFO) << "(NOCACHE) Added: " << full_name;
-					file_list.push_back(full_name);
+					_file_list.push_back(full_name);
 				}
 			}
 		} catch ( boost::exception& x ) {

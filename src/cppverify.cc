@@ -29,7 +29,6 @@ int main(int argc, char** argv)
 	desc.add_options()
 	("help,h", "show help on commands")
 	("include-path,I", po::value<std::vector<std::string> >(), "paths to scan for files");
-
 	po::positional_options_description p;
 	p.add("include-path", -1);
 	po::variables_map vm;
@@ -53,9 +52,8 @@ int main(int argc, char** argv)
 		for (size_t i = 0; i < res.size(); i++) {
 			std::cout << res[i] << std::endl;
 		}
-		fl.run_scan(res, files);
+		fl.run_scan(res);
 	}
-
 
 //  std::string scanpath(".");
 //  fl.scan_dirs(scanpath, files);

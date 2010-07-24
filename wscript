@@ -71,6 +71,8 @@ def configure(conf):
 			uselib_store='glog', mandatory=True)
 	conf.check_cfg(package='libgtest', args='--cflags --libs',
 			uselib_store='gtest', mandatory=False)
+	conf.check_cfg(package='libonig', args='--cflags --libs',
+			uselib_store='onig', mandatory=True)
 	conf.find_program('cppcheck', var='CPPCHECK')
 	conf.find_program('astyle', var='ASTYLE')
 	conf.find_program('doxygen', var='DOXYGEN')
@@ -88,7 +90,7 @@ def build(bld):
 			features = 'cxx cprogram',
 			source = bld.path.ant_glob('**/*.cc'),
 			target = APPNAME,
-			uselib = [ 'boost_program_options', 'boost_filesystem', 'boost_regex', 'boost_system',
+			uselib = [ 'libonig', 'boost_program_options', 'boost_filesystem', 'boost_regex', 'boost_system',
 				'glog', ],
 			includes = './src /usr/include',
 			cxxflags = [ '-g', '-static', '-Wall', '-pedantic', '-std=c++0x', ]
