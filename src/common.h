@@ -1,6 +1,10 @@
 #ifndef CPPVERIFY_COMMON_H__
 #define CPPVERIFY_COMMON_H__
 
+#include <vector>
+#include <string>
+#include <ctime>
+#include <map>
 // boost
 #include <boost/shared_ptr.hpp>
 
@@ -15,6 +19,10 @@
 
 // defines
 #define CACHE_PATH "~/.cache"
+#define CACHE_FILE "cppverify"
+
+// defines
+#define CACHE_PATH ".cache"
 #define CACHE_FILE "cppverify"
 
 namespace cppverify {
