@@ -18,7 +18,7 @@
 #include <map>
 
 // defines
-#define CACHE_PATH "~/.cache"
+#define CACHE_DIR ".cache"
 #define CACHE_FILE "cppverify"
 
 // defines

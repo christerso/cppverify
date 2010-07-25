@@ -25,8 +25,10 @@ public:
 	 * @return True or false
 	 */
     bool scan_dirs(const boost::filesystem::path& dir_path, bool use_cache = true);
+	files_t& get_file_list();
 private:
-    void cache_file();
+    void get_homedir(std::string& homedir);
+    void load_cache();
     void save_cache(const files_t& file_list);
 private: 
 	files_t _file_list; // Complete filelist
