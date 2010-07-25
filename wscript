@@ -59,14 +59,22 @@ def set_options(opt):
 
 def configure(conf):
 	conf.check_tool('compiler_cxx')
-	conf.check_cxx(lib='boost_program_options', uselib_store='boost_program_options', mandatory=True)
-	conf.check_cxx(lib='boost_filesystem', uselib_store='boost_filesystem', mandatory=True)
-	conf.check_cxx(lib='boost_regex', uselib_store='boost_regex', mandatory=True)
-	conf.check_cxx(lib='boost_system', uselib_store='boost_system', mandatory=True)
-	conf.check_cfg(package='libglog', args='--cflags --libs',
+
+	conf.check_cfg(package='libboost_program_options', args='--cflags --libs --static',
+			uselib_store='boost_program_options', mandatory=True)
+	conf.check_cfg(package='libboost_filesystem', args='--cflags --libs --static',
+			uselib_store='boost_filesystem', mandatory=True)
+	conf.check_cfg(package='libboost_regex', args='--cflags --libs --static',
+			uselib_store='boost_regex', mandatory=True)
+	conf.check_cfg(package='libboost_system', args='--cflags --libs --static',
+			uselib_store='boost_system', mandatory=True)
+
+	conf.check_cfg(package='libglog', args='--cflags --libs --static',
 			uselib_store='glog', mandatory=True)
+
 	conf.check_cfg(package='libgtest', args='--cflags --libs',
 			uselib_store='gtest', mandatory=False)
+
 	conf.find_program('cppcheck', var='CPPCHECK')
 	conf.find_program('astyle', var='ASTYLE')
 	conf.find_program('doxygen', var='DOXYGEN')
@@ -80,6 +88,7 @@ def build(bld):
 	bld.add_pre_fun(_run_astyle)
 	bld.add_post_fun(_run_doxygen)
 
+	bld.env.FULLSTATIC = True
 	bld.new_task_gen(
 			features = 'cxx cprogram',
 			source = bld.path.ant_glob('**/*.cc'),
@@ -87,6 +96,6 @@ def build(bld):
 			uselib = [ 'boost_program_options', 'boost_filesystem', 'boost_regex', 'boost_system',
 				'glog', ],
 			includes = './src /usr/include',
-			cxxflags = [ '-g', '-static', '-Wall', '-pedantic', '-std=c++0x', ]
+			cxxflags = [ '-g', '-Wall', '-Wextra', '-pedantic', '-std=c++0x', ]
 		)
 
