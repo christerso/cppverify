@@ -1,17 +1,17 @@
 #ifndef CPPVERIFY_COMMON_H__
 #define CPPVERIFY_COMMON_H__
 
-// std
-#include <vector>
-#include <string>
-#include <ctime>
-#include <map>
-
 // boost
 #include <boost/shared_ptr.hpp>
 
 // google
 #include <glog/logging.h>
+
+// std
+#include <ctime>
+#include <string>
+#include <vector>
+#include <map>
 
 // defines
 #define CACHE_PATH "~/.cache"

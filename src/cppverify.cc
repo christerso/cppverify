@@ -1,20 +1,16 @@
-// std
-#include <iostream>
-#include <vector>
-#include <string>
-#include <map>
+// own
+#include "common.h"
+#include "fileloader.h"
+#include "check.h"
 
 // boost
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
-#include "common.h"
-#include "check.h"
 
-// own
-#include "fileloader.h"
+// std
+#include <iostream>
 
-// Not pulling the namespace in, instead shortening the name of it
 namespace po = boost::program_options;
 
 using namespace cppverify;

@@ -4,15 +4,12 @@
 // Own
 #include "common.h"
 
-// Standard C++ includes
-#include <string>
-#include <fstream>
-#include <ctime>
-#include <map>
-
 // Boost Includes
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
+
+// Standard C++ includes
+#include <fstream>
 
 namespace cppverify {
 

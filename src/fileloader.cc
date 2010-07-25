@@ -9,13 +9,6 @@
 // Standard C++
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <ctime>
-#include <vector>
-#include <map>
-
-// Google
-#include <glog/logging.h>
 
 using namespace cppverify;
 
