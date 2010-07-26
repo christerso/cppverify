@@ -59,14 +59,10 @@ def set_options(opt):
 
 def configure(conf):
 	conf.check_tool('compiler_cxx')
-	conf.check_cfg(package='libboost_program_options', args='--cflags --libs',
-			uselib_store='boost_program_options', mandatory=True)
-	conf.check_cfg(package='libboost_filesystem', args='--cflags --libs',
-			uselib_store='boost_filesystem', mandatory=True)
-	conf.check_cfg(package='libboost_regex', args='--cflags --libs',
-			uselib_store='boost_regex', mandatory=True)
-	conf.check_cfg(package='libboost_system', args='--cflags --libs',
-			uselib_store='boost_system', mandatory=True)
+	conf.check_cxx(lib='boost_program_options', uselib_store='boost_program_options', mandatory=True)
+	conf.check_cxx(lib='boost_filesystem', uselib_store='boost_filesystem', mandatory=True)
+	conf.check_cxx(lib='boost_regex', uselib_store='boost_regex', mandatory=True)
+	conf.check_cxx(lib='boost_system', uselib_store='boost_system', mandatory=True)
 	conf.check_cfg(package='libglog', args='--cflags --libs',
 			uselib_store='glog', mandatory=True)
 	conf.check_cfg(package='libgtest', args='--cflags --libs',

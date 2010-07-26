@@ -29,7 +29,7 @@ public:
 private:
     void get_homedir(std::string& homedir);
     void load_cache();
-    void save_cache(const files_t& file_list);
+    void save_cache();
 private: 
 	files_t _file_list; // Complete filelist
     cache_t _file_cache;
