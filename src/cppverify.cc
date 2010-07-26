@@ -1,4 +1,5 @@
 // own
+#include "cheaders.h"
 #include "common.h"
 #include "fileloader.h"
 #include "check.h"
@@ -11,12 +12,12 @@
 
 // std
 #include <iostream>
-
+#include <cctype>
 // List of TODOs:
 //
 //	Add file-extension filtering
 //	Make paths full path (optional)
-//  Add Depth of scan
+//   Add Depth of scan
 
 namespace po = boost::program_options;
 
@@ -35,6 +36,7 @@ int main(int argc, char** argv)
 	desc.add_options()
 	("help,h", "show help on commands")
 	("use-cache,c", "cache the files to scan")
+	("c-style,s", po::value<std::string>(), "C style to scan for")
 	("include-path,I", po::value<std::vector<std::string> >(), "paths to scan for files");
 	po::positional_options_description p;
 	p.add("include-path", -1);
@@ -46,6 +48,7 @@ int main(int argc, char** argv)
 		std::cerr << x.what() << std::endl;
 		return retval;
 	}
+
 	if (vm.count("help")) {
 		std::cout << desc << std::endl;
 		return retval;

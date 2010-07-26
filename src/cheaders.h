@@ -34,7 +34,14 @@ enum headers_t
         H_TIME
     };
 
-char* c99_headers[] = {
+enum cstyles_t
+{
+	C99,
+	C95,
+	C89
+};
+
+const char* c99_headers[6][2] = {
     { "complex.h", "complex" },
     { "inttypes.h", "cinttypes" },
     { "stdint.h", "cstdint" },
@@ -43,13 +50,13 @@ char* c99_headers[] = {
     { "tgmath.h", "ctgmath" }
 };
 
-char* c94_95_headers[] = {
+const char* c94_95_headers[3][2] = {
     { "iso646.h", "ciso646" },
     { "wchar.h", "cwchar" },
-    { "wctype.h" "cwctype" }
+    { "wctype.h", "cwctype" }
 };
 
-char* c89_90_headers[] = {
+const char* c89_90_headers[15][2] = {
     { "assert.h", "cassert" },
     { "ctype.h", "cctype" },
     { "errno.h", "cerrno" },

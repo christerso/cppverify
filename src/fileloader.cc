@@ -43,7 +43,6 @@ void FileLoader::get_homedir(std::string& homedir)
 {
 	struct passwd *pwd;
 	pwd = getpwuid(getuid());
-	DLOG(INFO) << "Homedir for " << pwd->pw_name << " is " << pwd->pw_dir;
 	homedir = pwd->pw_dir;
 	if (!homedir.compare("") || pwd == NULL) {
 		homedir = getenv("HOME");
@@ -90,7 +89,7 @@ void FileLoader::load_cache()
 				stream_conv.str("");
 				if (!_file_cache.insert(std::make_pair(path, tt)).second) {
 					// And this should never happen as these values are loaded first, but who knows
-					DLOG(WARNING) << "Vlue already existed in cache, skipping add.";
+					DLOG(WARNING) << "Value already existed in cache, skipping add.";
 				}
 			}
 		}
@@ -132,6 +131,7 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, bool use_cac
 	if ( !boost::filesystem::exists(dir_path) ) {
 		return false;
 	}
+	// TODO: Transform dirpath to full path
 	std::string full_name;
 	boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
 	for ( boost::filesystem::directory_iterator itr(dir_path); itr != end_itr; ++itr ) {
