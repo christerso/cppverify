@@ -15,7 +15,6 @@
 #include <cctype>
 // List of TODOs:
 //
-//	Add file-extension filtering
 //	Make paths full path (optional)
 //   Add Depth of scan
 
