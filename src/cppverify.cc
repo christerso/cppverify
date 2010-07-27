@@ -12,6 +12,11 @@
 // std
 #include <iostream>
 
+// List of TODOs:
+//
+//	Add file-extension filtering
+//	Make paths full path (optional)
+//  Add Depth of scan
 
 namespace po = boost::program_options;
 
@@ -50,24 +55,25 @@ int main(int argc, char** argv)
 		use_cache = true;
 	}
 
-	// TODO: Add proper option parsing we should be able to toggle cache or not
-	// Add fileextension optins
-	// Add depth of scan
-
 	if (vm.count("include-path")) {
 		std::cout << "Including paths:" << std::endl;
 		std::vector<std::string> res;
+		boost::filesystem::path cpath;
+		std::vector<std::string> composed_vec;
 		res = vm["include-path"].as<std::vector<std::string> >();
 		for (size_t i = 0; i < res.size(); i++) {
-			std::cout << res[i] << std::endl;
+			// Composing full path from shortened paths
+			cpath = boost::filesystem::complete(res[i]);
+			std::cout << cpath.string() << std::endl;
+			composed_vec.push_back(cpath.string());
 		}
-		fl.run_scan(res, use_cache);
+		fl.run_scan(composed_vec, use_cache);
 	}
 
-	files_t files = fl.get_file_list(); // Change to shared_ptr on vector?
-//  std::string scanpath(".");
-//  fl.scan_dirs(scanpath, files);
-//  // Loop over all files and check them for warnings/errors
+	// Note reference used
+	files_t& files = fl.get_file_list();
+
+	// Loop over all files and check them for warnings/errors
 	p_results_t results( new results_t );
 	BOOST_FOREACH( file_t file, files ) {
 		p_warnings_t warnings = check( file );
