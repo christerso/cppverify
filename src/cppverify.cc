@@ -64,7 +64,7 @@ int main(int argc, char** argv)
 		std::vector<std::string> composed_vec;
 		res = vm["include-path"].as<std::vector<std::string> >();
 		for (size_t i = 0; i < res.size(); i++) {
-			// Composing full path from shortened paths
+			// Composing full path from shortened paths (might need some improvement)
 			cpath = boost::filesystem::complete(res[i]);
 			std::cout << cpath.string() << std::endl;
 			composed_vec.push_back(cpath.string());

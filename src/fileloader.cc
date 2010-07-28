@@ -22,6 +22,31 @@
 #include <glog/logging.h>
 
 using namespace cppverify;
+
+FileLoader::FileLoader()
+{
+	prepare_associations();
+}
+
+FileLoader::~FileLoader()
+{
+
+}
+
+void FileLoader::prepare_associations()
+{
+	char buf[4];
+	const char* ext[] = { "c", "cc", "cpp", "hpp", "h", "hh" };
+	LOG(INFO) << "Adding extensions:";
+	for (unsigned int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++ ) {
+		std::string val;
+		strncpy(buf, ext[i], sizeof(buf));
+		val = buf;
+		LOG(INFO) << val;
+		_assoc.insert(val);
+	}
+}
+
 void FileLoader::run_scan(std::vector<std::string>& file_paths, bool use_cache)
 {
 	if (use_cache) {
@@ -131,7 +156,6 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, bool use_cac
 	if ( !boost::filesystem::exists(dir_path) ) {
 		return false;
 	}
-	// TODO: Transform dirpath to full path
 	std::string full_name;
 	boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
 	for ( boost::filesystem::directory_iterator itr(dir_path); itr != end_itr; ++itr ) {
@@ -141,6 +165,9 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, bool use_cac
 				scan_dirs( itr->path(), use_cache );
 			} else {
 				full_name = itr->path().string();
+				if (!check_extensions(full_name)) {
+					continue;
+				}
 				if ( use_cache ) {
 					std::time_t time_modified = boost::filesystem::last_write_time(full_name);
 					if (_file_cache.insert(std::make_pair(full_name, time_modified)).second) {
@@ -168,4 +195,21 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, bool use_cac
 	}
 	return true;
 }
+
+bool FileLoader::check_extensions(const std::string& file_name)
+{
+	// Reverse scan for first dot
+	std::string::size_type st;
+	st = file_name.rfind(".");
+	std::string compval;
+	if (st != std::string::npos) {
+		compval = file_name.substr(st + 1);
+		if (_assoc.find(compval) != _assoc.end()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 
