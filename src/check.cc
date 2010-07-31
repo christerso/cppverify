@@ -9,9 +9,15 @@
 #include <iostream>
 #include <fstream>
 
-using namespace cppverify;
 
-const std::string _inc_match( "^#include [<\"](\\w+)[>\"]" );
+
+namespace cppverify {
+const std::string _inc_match( "^#include [<\"]([\\w\\./]+)[>\"]" );
+
+void check_header( uint32_t line_nr, const std::string header, warnings_t& warnings );
+}
+
+using namespace cppverify;
 
 void cppverify::check( const file_t& file, warnings_t& warnings )
 {
@@ -28,10 +34,40 @@ void cppverify::check( const file_t& file, warnings_t& warnings )
 
 		if( boost::regex_match( line, what, expr, boost::match_extra ) ) {
 			if( what.size() == 2 ) {
-				std::cout << "Line " << line_nr << ", header: \"" << what[1] << "\"" << std::endl;
+				check_header( line_nr, what[1], warnings );
+				//std::cout << "Line " << line_nr << ", header: \"" << what[1] << "\"" << std::endl;
 			} else {
 				// shouldn't happen
 			}
 		}
 	}
+
+	return;
+}
+
+void cppverify::check_header( uint32_t line_nr, const std::string header, warnings_t& warnings )
+{
+	// Don't like have three different for loops, find a better way
+	for( int i = 0; i < 15; i++ ) {
+		if( header.compare( c89_90_headers[i][0] ) == 0 ) {
+			std::cout << header << ' ' << c89_90_headers[i][0] << std::endl;
+			warnings.push_back( warning_t( line_nr, header ) );
+			return;
+		}
+	}
+	for( int i = 0; i < 3; i++ ) {
+		if( header.compare( c94_95_headers[i][0] ) == 0 ) {
+			std::cout << header << ' ' << c94_95_headers[i][0] << std::endl;
+			warnings.push_back( warning_t( line_nr, header ) );
+			return;
+		}
+	}
+	for( int i = 0; i < 6; i++ ) {
+		if( header.compare( c99_headers[i][0] ) == 0 ) {
+			std::cout << header << ' ' << c99_headers[i][0] << std::endl;
+			warnings.push_back( warning_t( line_nr, header ) );
+			return;
+		}
+	}
+	return;
 }

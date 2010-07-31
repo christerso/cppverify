@@ -88,6 +88,13 @@ int main(int argc, char** argv)
 
 	// Present the result
 	if ( !results.empty() ) {
+		BOOST_FOREACH( result_t result, results ) {
+			std::cout << "File: " << result.first << std::endl;
+
+			BOOST_FOREACH( warning_t warning, result.second ) {
+				std::cout << "Line: " << warning.line << " - " << warning.msg << std::endl;
+			}
+		}
 		// TODO Present/Generate result
 
 		// TODO if retval should be none zero when any warning are found, add it here

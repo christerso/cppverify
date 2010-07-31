@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <cstdint>
 
 // defines
 #define CACHE_DIR ".cache"
@@ -16,8 +17,12 @@
 
 namespace cppverify {
 
-typedef struct Warning
+typedef class Warning
 {
+public:
+	Warning( uint32_t _line, const std::string& _msg ) :
+		line( _line ), msg( _msg ) {};
+
 	uint32_t line;
 	std::string msg;
 } warning_t;
