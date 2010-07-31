@@ -1,5 +1,4 @@
 // own
-#include "cheaders.h"
 #include "common.h"
 #include "fileloader.h"
 #include "check.h"
@@ -76,17 +75,19 @@ int main(int argc, char** argv)
 	files_t& files = fl.get_file_list();
 
 	// Loop over all files and check them for warnings/errors
-	p_results_t results( new results_t );
+	results_t results;
 	BOOST_FOREACH( file_t file, files ) {
-		p_warnings_t warnings = check( file );
+		warnings_t warnings;
 
-		if ( !warnings->empty() ) {
-			results->push_back( p_result_t( new result_t( file, warnings ) ) );
+		check( file, warnings );
+
+		if ( !warnings.empty() ) {
+			results.push_back( result_t( file, warnings ) );
 		}
 	}
 
 	// Present the result
-	if ( !results->empty() ) {
+	if ( !results.empty() ) {
 		// TODO Present/Generate result
 
 		// TODO if retval should be none zero when any warning are found, add it here

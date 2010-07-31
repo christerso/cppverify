@@ -5,7 +5,7 @@
 
 namespace cppverify {
 
-p_warnings_t check( const file_t& file ); // TODO Add options object
+void check( const file_t& file, warnings_t& warnings ); // TODO Add options object
 
 }
 

@@ -1,5 +1,7 @@
 #include "check.h"
 
+#include "cheaders.h"
+
 // boost
 #include <boost/regex.hpp>
 
@@ -11,9 +13,8 @@ using namespace cppverify;
 
 const std::string _inc_match( "^#include [<\"](\\w+)[>\"]" );
 
-p_warnings_t cppverify::check( const file_t& file )
+void cppverify::check( const file_t& file, warnings_t& warnings )
 {
-	p_warnings_t warnings( new warnings_t );
 	boost::regex expr( _inc_match );
 	boost::smatch what;
 	std::string line;
@@ -29,10 +30,8 @@ p_warnings_t cppverify::check( const file_t& file )
 			if( what.size() == 2 ) {
 				std::cout << "Line " << line_nr << ", header: \"" << what[1] << "\"" << std::endl;
 			} else {
-				// should happen
+				// shouldn't happen
 			}
 		}
 	}
-
-	return warnings;
 }
