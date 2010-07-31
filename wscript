@@ -56,20 +56,27 @@ def set_options(opt):
 	opt.tool_options('compiler_cxx')
 
 	opt.add_option('--cppcheck', default=False, dest='cppcheck', action='store_true')
+	opt.add_option('--static', default=False, dest='static', action='store_true')
 
 def configure(conf):
+	conf.env.FULLSTATIC = Options.options.static
+
 	conf.check_tool('compiler_cxx')
 
-	conf.check_cfg(package='libboost_program_options', args='--cflags --libs --static',
+	pkg_config_args = '--cflags --libs'
+	if conf.env.FULLSTATIC:
+		pkg_config_args = '%s %s' % (pkg_config_args, '--static')
+	
+	conf.check_cfg(package='libboost_program_options', args=pkg_config_args,
 			uselib_store='boost_program_options', mandatory=True)
-	conf.check_cfg(package='libboost_filesystem', args='--cflags --libs --static',
+	conf.check_cfg(package='libboost_filesystem', args=pkg_config_args,
 			uselib_store='boost_filesystem', mandatory=True)
-	conf.check_cfg(package='libboost_regex', args='--cflags --libs --static',
+	conf.check_cfg(package='libboost_regex', args=pkg_config_args,
 			uselib_store='boost_regex', mandatory=True)
-	conf.check_cfg(package='libboost_system', args='--cflags --libs --static',
+	conf.check_cfg(package='libboost_system', args=pkg_config_args,
 			uselib_store='boost_system', mandatory=True)
 
-	conf.check_cfg(package='libglog', args='--cflags --libs --static',
+	conf.check_cfg(package='libglog', args=pkg_config_args,
 			uselib_store='glog', mandatory=True)
 
 	conf.check_cfg(package='libgtest', args='--cflags --libs',
@@ -88,7 +95,6 @@ def build(bld):
 	bld.add_pre_fun(_run_astyle)
 	bld.add_post_fun(_run_doxygen)
 
-	bld.env.FULLSTATIC = True
 	bld.new_task_gen(
 			features = 'cxx cprogram',
 			source = bld.path.ant_glob('**/*.cc'),
