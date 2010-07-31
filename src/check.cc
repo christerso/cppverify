@@ -41,7 +41,8 @@ void cppverify::check( const file_t& file, warnings_t& warnings )
 				DLOG(INFO) << "Found header '" << what[1] << "' on line " << line_nr;
 				check_header( line_nr, what[1], warnings );
 			} else {
-				// shouldn't happen
+				LOG(ERROR) << "Got a match that not size 2, this should happen!";
+				std::abort();
 			}
 		}
 	}
