@@ -19,7 +19,7 @@ p_warnings_t cppverify::check( const file_t& file )
 	std::string line;
 	uint32_t line_nr = 0;
 
-	std::ifstream file_stream( file, std::ifstream::in );
+	std::ifstream file_stream( const_cast<file_t&>(file), std::ifstream::in );
 
 	std::cout << "Checking file: " << file << std::endl;
 	while( getline( file_stream, line ).good() ) {
