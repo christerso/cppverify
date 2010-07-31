@@ -20,10 +20,20 @@
 namespace po = boost::program_options;
 
 namespace cppverify {
-int setup_program_options( int argc, char** argv, po::options_description& opt_desc, po::variables_map& vm );
-void find_files( po::variables_map& vm, FileLoader& fl );
-void check_files( po::variables_map& vm, FileLoader& fl, results_t& results );
-int show_result( po::variables_map& vm, const results_t& results );
+class CppVerify {
+public:
+	CppVerify( void );
+	int setup_program_options( int argc, char** argv );
+	int check_program_options( void );
+	void find_files( void );
+	void check_files( void );
+	int show_result( void );
+private:
+	results_t results;
+	FileLoader fl;
+	po::options_description opt_desc;
+	po::variables_map vm;
+};
 }
 
 using namespace cppverify;
@@ -34,35 +44,35 @@ int main(int argc, char** argv)
 	google::InitGoogleLogging(argv[0]);
 
 	int retval = 0;
-	FileLoader fl;
-	results_t results;
+	CppVerify cv;
 
-	// TODO refactor this out
-	po::variables_map vm;
-	po::options_description opt_desc("Allowed options");
-
-	retval = setup_program_options( argc, argv, opt_desc, vm );
+	retval = cv.setup_program_options( argc, argv );
 
 	// check options
 	if( retval != 0 ) {
 		goto main_exit;
-	} else if( vm.count("help") ) {
-		std::cout << opt_desc << std::endl;
-		goto main_exit;
 	}
 
 	// Find all files to check
-	find_files( vm, fl );
+	cv.find_files();
 
 	// check files
-	check_files( vm, fl, results );
+	cv.check_files();
 
 	// Present the result
-	retval = show_result( vm, results );
+	retval = cv.show_result();
 
 main_exit:
 	google::ShutdownGoogleLogging();
 	return retval;
+}
+
+CppVerify::CppVerify( void ) :
+	results(),
+	fl(),
+	opt_desc("Allowed options"),
+	vm()
+{
 }
 
 /**
@@ -75,9 +85,10 @@ main_exit:
  *
  * @return 0 if successfull.
  */
-int cppverify::setup_program_options( int argc, char** argv, po::options_description& opt_desc, po::variables_map& vm )
+int CppVerify::setup_program_options( int argc, char** argv )
 {
 	int retval = 0;
+
 	// Preparing boost command line options
 	opt_desc.add_options()
 	("help,h", "show help on commands")
@@ -95,6 +106,22 @@ int cppverify::setup_program_options( int argc, char** argv, po::options_descrip
 		retval = -1;
 	}
 
+	if( retval == 0 ) {
+		retval = check_program_options();
+	}
+
+	return retval;
+}
+
+int CppVerify::check_program_options( void )
+{
+	int retval = 0;
+
+	if( vm.count("help") ) {
+		std::cout << opt_desc << std::endl;
+		retval = -1;
+	}
+
 	return retval;
 }
 
@@ -104,7 +131,7 @@ int cppverify::setup_program_options( int argc, char** argv, po::options_descrip
  * @param vm Parsed options to cppverify.
  * @param fl File loader.
  */
-void cppverify::find_files( po::variables_map& vm, FileLoader& fl )
+void CppVerify::find_files( void )
 {
 	if( vm.count( "include-path" ) ) {
 		std::vector<std::string> res;
@@ -137,7 +164,7 @@ void cppverify::find_files( po::variables_map& vm, FileLoader& fl )
  * @param fl The file loader, contains all files to check.
  * @param results The results from the checks (out)
  */
-void cppverify::check_files( po::variables_map& vm, FileLoader& fl, results_t& results )
+void CppVerify::check_files( void )
 {
 	// Loop over all files and check them for warnings/errors
 	BOOST_FOREACH( file_t file, fl.get_file_list() ) {
@@ -163,7 +190,7 @@ void cppverify::check_files( po::variables_map& vm, FileLoader& fl, results_t& r
  * @return 0 if everything was successful, 1 if any warnings are in the
  * results and the user has activated this in the options.
  */
-int cppverify::show_result( po::variables_map& vm, const results_t& results )
+int CppVerify::show_result( void )
 {
 	int retval = 0;
 
