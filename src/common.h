@@ -1,10 +1,6 @@
 #ifndef CPPVERIFY_COMMON_H__
 #define CPPVERIFY_COMMON_H__
 
-#include <vector>
-#include <string>
-#include <ctime>
-#include <map>
 // boost
 #include <boost/shared_ptr.hpp>
 
