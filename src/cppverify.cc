@@ -65,6 +65,16 @@ main_exit:
 	return retval;
 }
 
+/**
+ * Setup the option parser
+ *
+ * @param argc Number of arguments to cppverify
+ * @param argv Array of char pointers with all arguments to cppverify.
+ * @param opt_desc The option description.
+ * @param vm The parsed options.
+ *
+ * @return 0 if successfull.
+ */
 int cppverify::setup_program_options( int argc, char** argv, po::options_description& opt_desc, po::variables_map& vm )
 {
 	int retval = 0;
@@ -88,6 +98,12 @@ int cppverify::setup_program_options( int argc, char** argv, po::options_descrip
 	return retval;
 }
 
+/**
+ * Finds all the files to check.
+ *
+ * @param vm Parsed options to cppverify.
+ * @param fl File loader.
+ */
 void cppverify::find_files( po::variables_map& vm, FileLoader& fl )
 {
 	if( vm.count( "include-path" ) ) {
@@ -114,6 +130,13 @@ void cppverify::find_files( po::variables_map& vm, FileLoader& fl )
 	return;
 }
 
+/**
+ * Loops over all the files and checks each file.
+ *
+ * @param vm Options to cppverify.
+ * @param fl The file loader, contains all files to check.
+ * @param results The results from the checks (out)
+ */
 void cppverify::check_files( po::variables_map& vm, FileLoader& fl, results_t& results )
 {
 	// Loop over all files and check them for warnings/errors
@@ -131,9 +154,19 @@ void cppverify::check_files( po::variables_map& vm, FileLoader& fl, results_t& r
 	return;
 }
 
+/**
+ * Shows the result of the check(s) to the user.
+ *
+ * @param vm Options to cppverify.
+ * @param results The results from the check(s).
+ *
+ * @return 0 if everything was successful, 1 if any warnings are in the
+ * results and the user has activated this in the options.
+ */
 int cppverify::show_result( po::variables_map& vm, const results_t& results )
 {
 	int retval = 0;
+
 	if ( !results.empty() ) {
 		BOOST_FOREACH( result_t result, results ) {
 			BOOST_FOREACH( warning_t warning, result.second ) {
@@ -143,8 +176,12 @@ int cppverify::show_result( po::variables_map& vm, const results_t& results )
 		// TODO Present/Generate result
 
 		// TODO if retval should be none zero when any warning are found, add it here
+		if( false ) {
+			retval = 1;
+		}
 	} else {
-		// TODO print Everything is fine!
+		// TODO Should be possible to disable this.
+		std::cout << "No errors" << std::endl;
 		// XXX Should an empty xml file be generated in this case?
 	}
 
