@@ -39,11 +39,11 @@ def _run_doxygen( bld ):
 	if bld.env['DOXYGEN']:
 		doxy_dict = {
 				'project_name': APPNAME,
-				'output_directory': os.path.join( bld.bdir, 'default/docs' ),
-				'warn_logfile': os.path.join( bld.bdir, 'default/doxygen.log' ),
+				'output_directory': os.path.join( bld.bdir, '%s/docs' % bld.env.NAME ),
+				'warn_logfile': os.path.join( bld.bdir, '%s/doxygen.log' % bld.env.NAME ),
 			}
 		doxy_config_content = Utils.readf( './doxyconf.in' ) % doxy_dict
-		doxy_config_fname = os.path.join( bld.bdir, 'default/doxygen.conf' )
+		doxy_config_fname = os.path.join( bld.bdir, '%s/doxygen.conf' % bld.env.NAME )
 
 		doxy_config = open( doxy_config_fname, 'w' )
 		doxy_config.write( doxy_config_content )
@@ -58,10 +58,19 @@ def set_options(opt):
 	opt.add_option('--cppcheck', default=False, dest='cppcheck', action='store_true')
 	opt.add_option('--static', default=False, dest='static', action='store_true')
 
+	opt.add_option('--build_kind', action='store', default='debug', help='build the selected variants')
+
 def configure(conf):
 	conf.env.FULLSTATIC = Options.options.static
+	conf.env.NAME = 'default'
 
 	conf.check_tool('compiler_cxx')
+
+	conf.find_program('cppcheck', var='CPPCHECK')
+	conf.find_program('astyle', var='ASTYLE')
+	conf.find_program('doxygen', var='DOXYGEN')
+	conf.find_program('dot', var='dot')
+	conf.find_program('ctags', var='CTAGS')
 
 	pkg_config_args = '--cflags --libs'
 	if conf.env.FULLSTATIC:
@@ -82,11 +91,17 @@ def configure(conf):
 	conf.check_cfg(package='libgtest', args='--cflags --libs',
 			uselib_store='gtest', mandatory=False)
 
-	conf.find_program('cppcheck', var='CPPCHECK')
-	conf.find_program('astyle', var='ASTYLE')
-	conf.find_program('doxygen', var='DOXYGEN')
-	conf.find_program('dot', var='dot')
-	conf.find_program('ctags', var='CTAGS')
+	for name in ['debug', 'release']:
+		env = conf.env.copy()
+		env.set_variant(name)
+		conf.set_env_name(name, env)
+		conf.env.NAME = name
+	
+	conf.setenv( 'debug' )
+	conf.env.CXXFLAGS = [ '-g', '-Wall', '-Wextra', '-pedantic', '-std=c++0x', ]
+
+	conf.setenv( 'release' )
+	conf.env.CXXFLAGS = [ '-Wall', '-Wextra', '-pedantic', '-std=c++0x', ]
 
 def build(bld):
 	if Options.options.cppcheck:
@@ -102,6 +117,16 @@ def build(bld):
 			uselib = [ 'boost_program_options', 'boost_filesystem', 'boost_regex', 'boost_system',
 				'glog', ],
 			includes = './src /usr/include',
-			cxxflags = [ '-g', '-Wall', '-Wextra', '-pedantic', '-std=c++0x', ]
+			cxxflags = bld.env.CXXFLAGS,
 		)
 
+	#Setup the build kinds to run
+	for obj in bld.all_task_gen[:]: 
+		for x in ['debug', 'release']:
+			cloned_obj = obj.clone(x) 
+			kind = Options.options.build_kind
+			if kind.find(x) < 0:
+				cloned_obj.posted = True
+
+		# disable the default one
+		obj.posted = True
