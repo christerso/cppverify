@@ -9,16 +9,14 @@
 #include <glog/logging.h>
 
 // std
-#include <iostream>
+#include <sstream>
 #include <fstream>
-
-
-
 
 namespace cppverify {
 const std::string _inc_match( "^#include [<\"]([\\w\\./]+)[>\"]" );
 
 void check_header( uint32_t line_nr, const std::string header, warnings_t& warnings );
+std::string create_wrong_header_msg( const std::string& header, const char* cpp_header );
 }
 
 using namespace cppverify;
@@ -56,23 +54,30 @@ void cppverify::check_header( uint32_t line_nr, const std::string header, warnin
 	for( int i = 0; i < 15; i++ ) {
 		if( header.compare( c89_90_headers[i][0] ) == 0 ) {
 			DLOG(INFO) << header << " matched " << c89_90_headers[i][0];
-			warnings.push_back( warning_t( line_nr, header ) );
+			warnings.push_back( warning_t( line_nr, create_wrong_header_msg( header, c89_90_headers[i][1] ) ) );
 			return;
 		}
 	}
 	for( int i = 0; i < 3; i++ ) {
 		if( header.compare( c94_95_headers[i][0] ) == 0 ) {
 			DLOG(INFO) << header << " matched " << c94_95_headers[i][0];
-			warnings.push_back( warning_t( line_nr, header ) );
+			warnings.push_back( warning_t( line_nr, create_wrong_header_msg( header, c94_95_headers[i][1] ) ) );
 			return;
 		}
 	}
 	for( int i = 0; i < 6; i++ ) {
 		if( header.compare( c99_headers[i][0] ) == 0 ) {
 			DLOG(INFO) << header << " matched " << c99_headers[i][0];
-			warnings.push_back( warning_t( line_nr, header ) );
+			warnings.push_back( warning_t( line_nr, create_wrong_header_msg( header, c99_headers[i][1] ) ) );
 			return;
 		}
 	}
 	return;
+}
+
+std::string cppverify::create_wrong_header_msg( const std::string& header, const char* cpp_header )
+{
+	std::ostringstream oss;
+	oss << "Change include of '" << header << "' to '" << cpp_header << "'";
+	return oss.str();
 }

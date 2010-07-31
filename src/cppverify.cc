@@ -57,7 +57,6 @@ int main(int argc, char** argv)
 	}
 
 	if (vm.count("include-path")) {
-		std::cout << "Including paths:" << std::endl;
 		std::vector<std::string> res;
 		boost::filesystem::path cpath;
 		std::vector<std::string> composed_vec;
@@ -65,7 +64,6 @@ int main(int argc, char** argv)
 		for (size_t i = 0; i < res.size(); i++) {
 			// Composing full path from shortened paths (might need some improvement)
 			cpath = boost::filesystem::complete(res[i]);
-			std::cout << cpath.string() << std::endl;
 			composed_vec.push_back(cpath.string());
 		}
 		fl.run_scan(composed_vec, use_cache);
@@ -89,10 +87,8 @@ int main(int argc, char** argv)
 	// Present the result
 	if ( !results.empty() ) {
 		BOOST_FOREACH( result_t result, results ) {
-			std::cout << "File: " << result.first << std::endl;
-
 			BOOST_FOREACH( warning_t warning, result.second ) {
-				std::cout << "Line: " << warning.line << " - " << warning.msg << std::endl;
+				std::cout << result.first << ":" << warning.line << " - " << warning.msg << std::endl;
 			}
 		}
 		// TODO Present/Generate result
