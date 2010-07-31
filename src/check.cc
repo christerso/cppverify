@@ -5,9 +5,13 @@
 // boost
 #include <boost/regex.hpp>
 
+// glog
+#include <glog/logging.h>
+
 // std
 #include <iostream>
 #include <fstream>
+
 
 
 
@@ -28,14 +32,14 @@ void cppverify::check( const file_t& file, warnings_t& warnings )
 
 	std::ifstream file_stream( file.c_str(), std::ifstream::in );
 
-	std::cout << "Checking file: " << file << std::endl;
+	DLOG(INFO) << "Checking file: " << file;
 	while( getline( file_stream, line ).good() ) {
 		line_nr += 1;
 
 		if( boost::regex_match( line, what, expr, boost::match_extra ) ) {
 			if( what.size() == 2 ) {
+				DLOG(INFO) << "Found header '" << what[1] << "' on line " << line_nr;
 				check_header( line_nr, what[1], warnings );
-				//std::cout << "Line " << line_nr << ", header: \"" << what[1] << "\"" << std::endl;
 			} else {
 				// shouldn't happen
 			}
@@ -50,21 +54,21 @@ void cppverify::check_header( uint32_t line_nr, const std::string header, warnin
 	// Don't like have three different for loops, find a better way
 	for( int i = 0; i < 15; i++ ) {
 		if( header.compare( c89_90_headers[i][0] ) == 0 ) {
-			std::cout << header << ' ' << c89_90_headers[i][0] << std::endl;
+			DLOG(INFO) << header << " matched " << c89_90_headers[i][0];
 			warnings.push_back( warning_t( line_nr, header ) );
 			return;
 		}
 	}
 	for( int i = 0; i < 3; i++ ) {
 		if( header.compare( c94_95_headers[i][0] ) == 0 ) {
-			std::cout << header << ' ' << c94_95_headers[i][0] << std::endl;
+			DLOG(INFO) << header << " matched " << c94_95_headers[i][0];
 			warnings.push_back( warning_t( line_nr, header ) );
 			return;
 		}
 	}
 	for( int i = 0; i < 6; i++ ) {
 		if( header.compare( c99_headers[i][0] ) == 0 ) {
-			std::cout << header << ' ' << c99_headers[i][0] << std::endl;
+			DLOG(INFO) << header << " matched " << c99_headers[i][0];
 			warnings.push_back( warning_t( line_nr, header ) );
 			return;
 		}

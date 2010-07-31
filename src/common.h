@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <cstdint>
+#include <stdint.h>
 
 // defines
 #define CACHE_DIR ".cache"
