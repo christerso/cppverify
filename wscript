@@ -23,13 +23,20 @@ def _get_source_files( bld, _filter ):
 
 	return set(src_files)
 
-def _run_cppcheck(bld):
-	if bld.env.CPPCHECK:
-		src_files = _get_source_files( bld, ( '.cc', ))
+def _run_cppcheck(task):
+	src_files = [ os.path.abspath(p.srcpath(task.env)) for p in task.inputs ]
+	cppcheck_file = os.path.abspath( task.outputs[0].bldpath(task.env) )
+	result_file = os.path.abspath( task.outputs[1].bldpath(task.env) )
+	inc_dirs = ' '.join( [ '-I %s' % d for d in set( [ os.path.dirname( f ) for f
+		in src_files ] ) ] )
 
-		for sfile in src_files:
-			cmd = '%s %s' % ( bld.env['CPPCHECK'], sfile )
-			Utils.pproc.Popen(cmd, shell=True).wait()
+	f = open( cppcheck_file, 'w' )
+	f.write( '\n'.join( src_files ) )
+	f.close()
+
+	cmd = '%s -v --enable=style --file-list=%s --xml --error-exitcode=1 %s >/dev/null 2>%s' % (
+			task.env.CPPCHECK, cppcheck_file, inc_dirs, result_file, )
+	Utils.pproc.Popen(cmd, shell=True).wait()
 
 def _run_astyle(bld):
 	if bld.env.ASTYLE:
@@ -41,7 +48,7 @@ def _run_astyle(bld):
 			Utils.pproc.Popen(cmd, shell=True).wait()
 
 def _run_doxygen( task ):
-	if task.env['DOXYGEN']:
+	if task.env.DOXYGEN:
 		doxygen_in = os.path.abspath( task.inputs[0].srcpath(task.env) )
 		docs_dir = os.path.abspath( task.outputs[0].bldpath(task.env) )
 		doxygen_conf = os.path.abspath( task.outputs[1].bldpath(task.env) )
@@ -61,7 +68,7 @@ def _run_doxygen( task ):
 		doxy_config.write( doxygen_config_content )
 		doxy_config.close()
 		
-		Utils.pproc.Popen( '%s %s' % ( task.env['DOXYGEN'], doxygen_conf ),
+		Utils.pproc.Popen( '%s %s' % ( task.env.DOXYGEN, doxygen_conf ),
 				shell=True ).wait()
 
 def set_options(opt):
@@ -74,6 +81,8 @@ def set_options(opt):
 
 def configure(conf):
 	conf.env.FULLSTATIC = Options.options.static
+	conf.env.RUN_CPPCHECK = Options.options.cppcheck
+
 	conf.env.NAME = 'default'
 
 	conf.check_tool('compiler_cxx')
@@ -104,11 +113,13 @@ def configure(conf):
 	conf.check_cfg(package='libgtest', args='--cflags --libs',
 			uselib_store='gtest', mandatory=False)
 
+	conf.env.INC_DIRS = [ './src', '/usr/include', ]
+
 	for name in ['debug', 'release']:
 		env = conf.env.copy()
 		env.set_variant(name)
+		env.NAME = name
 		conf.set_env_name(name, env)
-		conf.env.NAME = name
 	
 	conf.setenv( 'debug' )
 	conf.env.CXXFLAGS = [ '-g', '-Wall', '-Wextra', '-pedantic', '-std=c++0x', ]
@@ -116,29 +127,42 @@ def configure(conf):
 	conf.setenv( 'release' )
 	conf.env.CXXFLAGS = [ '-Wall', '-Wextra', '-pedantic', '-std=c++0x', ]
 
-def build(bld):
-	if Options.options.cppcheck:
-		bld.add_pre_fun(_run_cppcheck)
+	conf.setenv( 'default' )
 
+def build(bld):
 	bld.add_pre_fun(_run_astyle)
 
 	cc_files = bld.path.ant_glob('**/*.cc').split(' ')
 	h_files = bld.path.ant_glob( '**/*.h').split(' ')
 	src_files = cc_files + h_files
 
-	bld.new_task_gen(
-			rule=_run_doxygen,
-			source=[ 'doxyconf.in', ] + src_files,
-			target=[ 'docs', 'doxygen.conf', 'doxygen.log' ],
-		)
+	if bld.env.RUN_CPPCHECK:
+		# run cppcheck
+		bld.new_task_gen(
+				rule = _run_cppcheck,
+				source = src_files,
+				target = [ 'cppcheck_files.txt', 'cppcheck.xml', ],
+				uselib = [ 'boost_program_options', 'boost_filesystem', 'boost_regex', 'boost_system',
+					'glog', ],
+				includes = bld.env.INC_DIRS,
+			)
+
+	# compile cppverify
 	bld.new_task_gen(
 			features = 'cxx cprogram',
 			source = cc_files,
 			target = APPNAME,
 			uselib = [ 'boost_program_options', 'boost_filesystem', 'boost_regex', 'boost_system',
 				'glog', ],
-			includes = './src /usr/include',
+			includes = bld.env.INC_DIRS,
 			cxxflags = bld.env.CXXFLAGS,
+		)
+
+	# doxygen task
+	bld.new_task_gen(
+			rule=_run_doxygen,
+			source=[ 'doxyconf.in', ] + src_files,
+			target=[ 'docs', 'doxygen.conf', 'doxygen.log' ],
 		)
 
 	#Setup the build kinds to run
