@@ -15,31 +15,30 @@ APPNAME='cppverify'
 top = '.'
 out = 'build'
 
-def _run_cppcheck(bld):
-	if bld.env['CPPCHECK']:
-		for lib in bld.all_task_gen:
-			for source_file in Utils.to_list(lib.source):
-				if not os.path.splitext( source_file )[1] in [ '.cc', '.h', ]:
-					continue
+def _get_source_files( bld, _filter ):
+	src_files = []
+	for lib in bld.all_task_gen:
+		src_files += [ os.path.join( lib.path.abspath(), src ) for src in Utils.to_list(lib.source)
+				if os.path.splitext(src)[1] in _filter ]
 
-				cmd = '%s %s' % (
-						bld.env['CPPCHECK'],
-						os.path.join(lib.path.abspath(), source_file)
-					)
-				Utils.pproc.Popen(cmd, shell=True).wait()
+	return set(src_files)
+
+def _run_cppcheck(bld):
+	if bld.env.CPPCHECK:
+		src_files = _get_source_files( bld, ( '.cc', ))
+
+		for sfile in src_files:
+			cmd = '%s %s' % ( bld.env['CPPCHECK'], sfile )
+			Utils.pproc.Popen(cmd, shell=True).wait()
 
 def _run_astyle(bld):
-	if bld.env['ASTYLE']:
-		for lib in bld.all_task_gen:
-			for source_file in Utils.to_list(lib.source):
-				if not os.path.splitext( source_file )[1] in [ '.cc', '.h', ]:
-					continue
+	if bld.env.ASTYLE:
+		src_files = _get_source_files( bld, ( '.cc', '.h' ) )
 
-				cmd = '%s --style=stroustrup --indent=tab -n -q %s' % (
-						bld.env['ASTYLE'],
-						os.path.join(lib.path.abspath(), source_file)
-					)
-				Utils.pproc.Popen(cmd, shell=True).wait()
+		for sfile in src_files:
+			cmd = '%s --style=stroustrup --indent=tab -n -q %s' % (
+					bld.env['ASTYLE'], sfile )
+			Utils.pproc.Popen(cmd, shell=True).wait()
 
 def _run_doxygen( task ):
 	if task.env['DOXYGEN']:
@@ -87,6 +86,7 @@ def configure(conf):
 
 	pkg_config_args = '--cflags --libs'
 	if conf.env.FULLSTATIC:
+		# if you use static we need to link against additional libraries
 		pkg_config_args = '%s %s' % (pkg_config_args, '--static')
 	
 	conf.check_cfg(package='libboost_program_options', args=pkg_config_args,
