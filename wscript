@@ -19,6 +19,9 @@ def _run_cppcheck(bld):
 	if bld.env['CPPCHECK']:
 		for lib in bld.all_task_gen:
 			for source_file in Utils.to_list(lib.source):
+				if not os.path.splitext( source_file )[1] in [ '.cc', '.h', ]:
+					continue
+
 				cmd = '%s %s' % (
 						bld.env['CPPCHECK'],
 						os.path.join(lib.path.abspath(), source_file)
@@ -29,27 +32,37 @@ def _run_astyle(bld):
 	if bld.env['ASTYLE']:
 		for lib in bld.all_task_gen:
 			for source_file in Utils.to_list(lib.source):
+				if not os.path.splitext( source_file )[1] in [ '.cc', '.h', ]:
+					continue
+
 				cmd = '%s --style=stroustrup --indent=tab -n -q %s' % (
 						bld.env['ASTYLE'],
 						os.path.join(lib.path.abspath(), source_file)
 					)
 				Utils.pproc.Popen(cmd, shell=True).wait()
 
-def _run_doxygen( bld ):
-	if bld.env['DOXYGEN']:
+def _run_doxygen( task ):
+	if task.env['DOXYGEN']:
+		doxygen_in = os.path.abspath( task.inputs[0].srcpath(task.env) )
+		docs_dir = os.path.abspath( task.outputs[0].bldpath(task.env) )
+		doxygen_conf = os.path.abspath( task.outputs[1].bldpath(task.env) )
+		doxygen_log = os.path.abspath( task.outputs[2].bldpath(task.env) )
+		input_dir = os.path.join( os.path.dirname( doxygen_in ), 'src' )
+
 		doxy_dict = {
 				'project_name': APPNAME,
-				'output_directory': os.path.join( bld.bdir, '%s/docs' % bld.env.NAME ),
-				'warn_logfile': os.path.join( bld.bdir, '%s/doxygen.log' % bld.env.NAME ),
+				'output_directory': docs_dir,
+				'warn_logfile': doxygen_log,
+				'input_dir': input_dir,
 			}
-		doxy_config_content = Utils.readf( './doxyconf.in' ) % doxy_dict
-		doxy_config_fname = os.path.join( bld.bdir, '%s/doxygen.conf' % bld.env.NAME )
 
-		doxy_config = open( doxy_config_fname, 'w' )
-		doxy_config.write( doxy_config_content )
+		doxygen_config_content = Utils.readf( doxygen_in ) % doxy_dict
+
+		doxy_config = open( doxygen_conf, 'w' )
+		doxy_config.write( doxygen_config_content )
 		doxy_config.close()
 		
-		Utils.pproc.Popen( '%s %s' % ( bld.env['DOXYGEN'], doxy_config_fname ),
+		Utils.pproc.Popen( '%s %s' % ( task.env['DOXYGEN'], doxygen_conf ),
 				shell=True ).wait()
 
 def set_options(opt):
@@ -108,11 +121,19 @@ def build(bld):
 		bld.add_pre_fun(_run_cppcheck)
 
 	bld.add_pre_fun(_run_astyle)
-	bld.add_post_fun(_run_doxygen)
+
+	cc_files = bld.path.ant_glob('**/*.cc').split(' ')
+	h_files = bld.path.ant_glob( '**/*.h').split(' ')
+	src_files = cc_files + h_files
 
 	bld.new_task_gen(
+			rule=_run_doxygen,
+			source=[ 'doxyconf.in', ] + src_files,
+			target=[ 'docs', 'doxygen.conf', 'doxygen.log' ],
+		)
+	bld.new_task_gen(
 			features = 'cxx cprogram',
-			source = bld.path.ant_glob('**/*.cc'),
+			source = cc_files,
 			target = APPNAME,
 			uselib = [ 'boost_program_options', 'boost_filesystem', 'boost_regex', 'boost_system',
 				'glog', ],

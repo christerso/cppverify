@@ -17,8 +17,7 @@
 
 namespace cppverify {
 
-typedef class Warning
-{
+typedef class Warning {
 public:
 	Warning( uint32_t _line, const std::string& _msg ) :
 		line( _line ), msg( _msg ) {};

@@ -13,8 +13,7 @@
 
 namespace cppverify {
 
-class FileLoader
-{
+class FileLoader {
 public:
 	FileLoader();
 	~FileLoader();
@@ -30,18 +29,18 @@ public:
 	 *
 	 * @return True or false
 	 */
-    bool scan_dirs(const boost::filesystem::path& dir_path, bool use_cache = true);
+	bool scan_dirs(const boost::filesystem::path& dir_path, bool use_cache = true);
 	files_t& get_file_list();
 private:
-    void get_homedir(std::string& homedir);
-    void load_cache();
-    void save_cache();
+	void get_homedir(std::string& homedir);
+	void load_cache();
+	void save_cache();
 	void prepare_associations();
-    bool check_extensions(const std::string& file_name);
+	bool check_extensions(const std::string& file_name);
 private:
 	files_t _file_list; // Complete filelist
-    cache_t _file_cache;
-    std::set<std::string> _assoc;
+	cache_t _file_cache;
+	std::set<std::string> _assoc;
 };
 }
 #endif // FILELOADER_H_INCL__
