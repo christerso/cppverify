@@ -40,13 +40,13 @@ void cppverify::check( const file_t& file, warnings_t& warnings, utable_t& inc_t
 					DLOG(ERROR) << "Found system header '" << what[3] << "' on line " << line_nr;
 					check_header( line_nr, what[3], warnings, inc_table );
 				} else {
-					// what[2] matches when the user have used " and " for the system header
+					// what[2] matches when the user have used " for the system header
 					// this should also be a warning, as the user should use <> for system headers
 					DLOG(ERROR) << "Found system header '" << what[2] << "' on line " << line_nr;
 					check_header( line_nr, what[2], warnings, inc_table );
 				}
 			} else {
-				LOG(ERROR) << "Got a match that not size 2, this should happen!";
+				LOG(ERROR) << "Got a match that not size 4, this should happen!";
 				std::abort();
 			}
 		}

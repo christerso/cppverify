@@ -125,7 +125,7 @@ def configure(conf):
 	conf.env.CXXFLAGS = [ '-g', '-Wall', '-Wextra', '-pedantic', '-std=c++0x', ]
 
 	conf.setenv( 'release' )
-	conf.env.CXXFLAGS = [ '-Wall', '-Wextra', '-pedantic', '-std=c++0x', ]
+	conf.env.CXXFLAGS = [ '-Wall', '-Wextra', '-pedantic', '-O2' '-std=c++0x', ]
 
 	conf.setenv( 'default' )
 
