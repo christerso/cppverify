@@ -33,12 +33,6 @@ enum headers_t {
 	H_TIME
 };
 
-enum cstyles_t {
-	C99,
-	C95,
-	C89
-};
-
 const char* c99_headers[6][2] = {
 	{ "complex.h", "complex" },
 	{ "inttypes.h", "cinttypes" },

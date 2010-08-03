@@ -1,13 +1,19 @@
 // own
 #include "common.h"
 #include "fileloader.h"
-#include "check.h"
 
+#include "check.h"
+extern "C" {
+#include "cheaders.h"
+}
 // boost
 #include <exception>
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
+
+// c++ tr1
+#include <tr1/unordered_map>
 
 // std
 #include <iostream>
@@ -16,6 +22,7 @@
 //
 //	Make paths full path (optional)
 //   Add Depth of scan
+
 
 namespace po = boost::program_options;
 
@@ -27,12 +34,14 @@ public:
 	int check_program_options( void );
 	void find_files( void );
 	void check_files( void );
+	void check_style( void );
 	int show_result( void );
 private:
 	results_t results;
 	FileLoader fl;
 	po::options_description opt_desc;
 	po::variables_map vm;
+	utable_t _inc_table;
 };
 }
 
@@ -49,9 +58,11 @@ int main(int argc, char** argv)
 	retval = cv.setup_program_options( argc, argv );
 
 	// check options
-	if( retval != 0 ) {
+	if ( retval != 0 ) {
 		goto main_exit;
 	}
+	// Setup include table, defaulting to C99
+	cv.check_style();
 
 	// Find all files to check
 	cv.find_files();
@@ -68,10 +79,10 @@ main_exit:
 }
 
 CppVerify::CppVerify( void ) :
-	results(),
-	fl(),
-	opt_desc("Allowed options"),
-	vm()
+		results(),
+		fl(),
+		opt_desc("Allowed options"),
+		vm()
 {
 }
 
@@ -106,7 +117,7 @@ int CppVerify::setup_program_options( int argc, char** argv )
 		retval = -1;
 	}
 
-	if( retval == 0 ) {
+	if ( retval == 0 ) {
 		retval = check_program_options();
 	}
 
@@ -117,7 +128,7 @@ int CppVerify::check_program_options( void )
 {
 	int retval = 0;
 
-	if( vm.count("help") ) {
+	if ( vm.count("help") ) {
 		std::cout << opt_desc << std::endl;
 		retval = -1;
 	}
@@ -133,7 +144,7 @@ int CppVerify::check_program_options( void )
  */
 void CppVerify::find_files( void )
 {
-	if( vm.count( "include-path" ) ) {
+	if ( vm.count( "include-path" ) ) {
 		std::vector<std::string> res;
 		boost::filesystem::path cpath;
 		std::vector<std::string> composed_vec;
@@ -171,7 +182,7 @@ void CppVerify::check_files( void )
 		warnings_t warnings;
 
 		// TODO send vm to check, is this needed?
-		check( file, warnings );
+		check( file, warnings, _inc_table );
 
 		if ( !warnings.empty() ) {
 			results.push_back( result_t( file, warnings ) );
@@ -181,6 +192,47 @@ void CppVerify::check_files( void )
 	return;
 }
 
+void CppVerify::check_style( void )
+{
+	cstyles_t style_t;
+	if (vm.count("c-style")) {
+		std::string style;
+		style = vm["c-style"].as<std::string> ();
+		if (!style.compare("99")) {
+			LOG(INFO) << "Scanning conforms to C99";
+			style_t = C99;
+		} else if (!style.compare("95") || !style.compare("C95")) {
+			LOG(INFO) << "Scanning conforms to C94-C95";
+			style_t = C95;
+		} else if (!style.compare("89") || !style.compare("90")) {
+			LOG(INFO) << "Scanning confotms to C89-C90";
+			style_t = C89;
+		}
+	} else {
+		style_t = C99; // Default style if none given
+	}
+
+	switch (style_t) {
+	case C99:
+		for (unsigned int i = 0; i < sizeof(c99_headers)
+		        / sizeof(c99_headers[0]); i++) {
+			_inc_table.insert(std::make_pair(c99_headers[i][0],
+			                                 c99_headers[i][1]));
+		}
+	case C95:
+		for (unsigned int i = 0; i < sizeof(c94_95_headers)
+		        / sizeof(c94_95_headers[0]); i++) {
+			_inc_table.insert(std::make_pair(c94_95_headers[i][0],
+			                                 c94_95_headers[i][1]));
+		}
+	case C89:
+		for (unsigned int i = 0; i < sizeof(c89_90_headers)
+		        / sizeof(c89_90_headers[0]); i++) {
+			_inc_table.insert(std::make_pair(c89_90_headers[i][0],
+			                                 c89_90_headers[i][1]));
+		}
+	}
+}
 /**
  * Shows the result of the check(s) to the user.
  *
@@ -203,7 +255,7 @@ int CppVerify::show_result( void )
 		// TODO Present/Generate result
 
 		// TODO if retval should be none zero when any warning are found, add it here
-		if( false ) {
+		if ( false ) {
 			retval = 1;
 		}
 	} else {

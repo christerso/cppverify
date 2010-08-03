@@ -11,6 +11,9 @@
 #include <map>
 #include <cstdint>
 
+// c++ tr1
+#include <tr1/unordered_map>
+
 // defines
 #define CACHE_DIR ".cache"
 #define CACHE_FILE "cppverify"
@@ -20,12 +23,19 @@ namespace cppverify {
 typedef class Warning {
 public:
 	Warning( uint32_t _line, const std::string& _msg ) :
-		line( _line ), msg( _msg ) {};
+			line( _line ), msg( _msg ) {};
 
 	uint32_t line;
 	std::string msg;
 } warning_t;
 
+enum cstyles_t {
+	C99,
+	C95,
+	C89
+};
+
+typedef std::tr1::unordered_map<std::string, std::string> utable_t;
 typedef std::string file_t;
 typedef std::vector<file_t> files_t;
 

@@ -97,11 +97,11 @@ void FileLoader::load_cache()
 	std::string path;
 	std::string time;
 	std::string line;
+	std::string::size_type st;
 	std::ifstream infile(cachepath.c_str());
 	if (infile.is_open()) {
 		while (!infile.eof()) {
 			std::getline(infile, line);
-			std::string::size_type st;
 			st = line.rfind(":");
 			if (st != std::string::npos) {
 				path = line.substr(0, st);
@@ -123,6 +123,9 @@ void FileLoader::load_cache()
 
 void FileLoader::save_cache()
 {
+	if (_file_cache.empty()) {
+		return;
+	}
 	std::string userhome;
 	get_homedir(userhome);
 	std::string cachepathstr = userhome;
