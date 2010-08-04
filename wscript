@@ -77,7 +77,7 @@ def set_options(opt):
 	opt.add_option('--cppcheck', default=False, dest='cppcheck', action='store_true')
 	opt.add_option('--static', default=False, dest='static', action='store_true')
 
-	opt.add_option('--build_kind', action='store', default='release', help='build the selected variants')
+	opt.add_option('--build_kind', action='store', default='debug', help='build the selected variants')
 
 def configure(conf):
 	conf.env.FULLSTATIC = Options.options.static

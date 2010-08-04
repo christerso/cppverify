@@ -13,9 +13,8 @@
 namespace cppverify {
 
 const std::string _inc_match("^\\s*#include\\s*(<([^\"'<>|\\b]+)>|\"([^\"'<>|\\b]+)\")");
-// const std::string _inc_match( "^#include [<\"]([\\w\\./]+)[>\"]" );
 
-bool check_header( uint32_t line_nr, const std::string header, warnings_t& warnings, utable_t& inc_table );
+bool check_header( uint32_t line_nr, const std::string& header, warnings_t& warnings, utable_t& inc_table );
 std::string create_wrong_header_msg( const std::string& header, const char* cpp_header );
 }
 
@@ -59,7 +58,7 @@ bool cppverify::check( const file_t& file, warnings_t& warnings, utable_t& inc_t
 	return retval;
 }
 
-bool cppverify::check_header( uint32_t line_nr, const std::string header, warnings_t& warnings, utable_t& inc_table )
+bool cppverify::check_header( uint32_t line_nr, const std::string& header, warnings_t& warnings, utable_t& inc_table )
 {
 	bool retval = true;
 	utable_t::const_iterator cit;

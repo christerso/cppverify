@@ -36,7 +36,7 @@ FileLoader::~FileLoader()
 void FileLoader::prepare_associations()
 {
 	char buf[4];
-	const char* ext[] = { "c", "cc", "cpp", "hpp", "h", "hh" };
+	const char* ext[] = { "cc", "cpp", "hpp", "h", "hh" };
 	LOG(INFO) << "Adding extensions:";
 	for (unsigned int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++ ) {
 		std::string val;
