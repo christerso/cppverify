@@ -138,15 +138,11 @@ int CppVerify::check_program_options( void )
 
 /**
  * Finds all the files to check.
- *
- * @param vm Parsed options to cppverify.
- * @param fl File loader.
  */
 void CppVerify::find_files( void )
 {
 	if ( vm.count( "include-path" ) ) {
 		std::vector<std::string> res;
-		boost::filesystem::path cpath;
 		std::vector<std::string> composed_vec;
 		bool use_cache = false;
 
@@ -157,8 +153,16 @@ void CppVerify::find_files( void )
 		res = vm["include-path"].as<std::vector<std::string> >();
 		for (size_t i = 0; i < res.size(); i++) {
 			// Composing full path from shortened paths (might need some improvement)
-			cpath = boost::filesystem::complete(res[i]);
-			composed_vec.push_back(cpath.string());
+			char pathsz[256];
+			std::string pathstr;
+			strncpy(pathsz, res[i].c_str(), res[i].length());
+			if ('.' == res[i].c_str()[0]) {
+				getcwd(pathsz, 256);
+				pathstr = pathsz;
+			} else {
+				pathstr = res[i].c_str();
+			}
+			composed_vec.push_back(pathstr);
 		}
 		fl.run_scan(composed_vec, use_cache);
 	} else {
@@ -170,10 +174,6 @@ void CppVerify::find_files( void )
 
 /**
  * Loops over all the files and checks each file.
- *
- * @param vm Options to cppverify.
- * @param fl The file loader, contains all files to check.
- * @param results The results from the checks (out)
  */
 void CppVerify::check_files( void )
 {
@@ -192,6 +192,9 @@ void CppVerify::check_files( void )
 	return;
 }
 
+/**
+ * Checks which C dialect to scan for
+ */
 void CppVerify::check_style( void )
 {
 	cstyles_t style_t;
@@ -205,7 +208,7 @@ void CppVerify::check_style( void )
 			LOG(INFO) << "Scanning conforms to C94-C95";
 			style_t = C95;
 		} else if (!style.compare("89") || !style.compare("90")) {
-			LOG(INFO) << "Scanning confotms to C89-C90";
+			LOG(INFO) << "Scanning conforms to C89-C90";
 			style_t = C89;
 		}
 	} else {
@@ -235,12 +238,6 @@ void CppVerify::check_style( void )
 }
 /**
  * Shows the result of the check(s) to the user.
- *
- * @param vm Options to cppverify.
- * @param results The results from the check(s).
- *
- * @return 0 if everything was successful, 1 if any warnings are in the
- * results and the user has activated this in the options.
  */
 int CppVerify::show_result( void )
 {
