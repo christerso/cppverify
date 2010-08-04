@@ -182,13 +182,17 @@ void CppVerify::check_files( void )
 		warnings_t warnings;
 
 		// TODO send vm to check, is this needed?
-		check( file, warnings, _inc_table );
+		if (!check( file, warnings, _inc_table )) {
+			fl.remove_from_cache(file);
+		}
 
 		if ( !warnings.empty() ) {
 			results.push_back( result_t( file, warnings ) );
 		}
 	}
-
+	if (vm.count("use-cache")) {
+		fl.save_cache();
+	}
 	return;
 }
 

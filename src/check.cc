@@ -15,14 +15,15 @@ namespace cppverify {
 const std::string _inc_match("^\\s*#include\\s*(<([^\"'<>|\\b]+)>|\"([^\"'<>|\\b]+)\")");
 // const std::string _inc_match( "^#include [<\"]([\\w\\./]+)[>\"]" );
 
-void check_header( uint32_t line_nr, const std::string header, warnings_t& warnings, utable_t& inc_table );
+bool check_header( uint32_t line_nr, const std::string header, warnings_t& warnings, utable_t& inc_table );
 std::string create_wrong_header_msg( const std::string& header, const char* cpp_header );
 }
 
 using namespace cppverify;
 
-void cppverify::check( const file_t& file, warnings_t& warnings, utable_t& inc_table )
+bool cppverify::check( const file_t& file, warnings_t& warnings, utable_t& inc_table )
 {
+	bool retval = true;
 	boost::regex expr( _inc_match );
 	boost::smatch what;
 	std::string line;
@@ -38,36 +39,44 @@ void cppverify::check( const file_t& file, warnings_t& warnings, utable_t& inc_t
 			if ( what.size() == 4 ) {
 				if (!what[2].compare("")) {
 					DLOG(ERROR) << "Found system header '" << what[3] << "' on line " << line_nr;
-					check_header( line_nr, what[3], warnings, inc_table );
+					if (!check_header( line_nr, what[3], warnings, inc_table )) {
+						retval = false;
+					}
 				} else {
 					// what[2] matches when the user have used " for the system header
 					// this should also be a warning, as the user should use <> for system headers
 					DLOG(ERROR) << "Found system header '" << what[2] << "' on line " << line_nr;
-					check_header( line_nr, what[2], warnings, inc_table );
+					if (!check_header( line_nr, what[2], warnings, inc_table )) {
+						retval = false;
+					}
 				}
 			} else {
 				LOG(ERROR) << "Got a match that not size 4, this should happen!";
-				std::abort();
+				std::abort();	// TODO: replace this as this doesn't cleanup
 			}
 		}
 	}
-	return;
+	return retval;
 }
 
-void cppverify::check_header( uint32_t line_nr, const std::string header, warnings_t& warnings, utable_t& inc_table )
+bool cppverify::check_header( uint32_t line_nr, const std::string header, warnings_t& warnings, utable_t& inc_table )
 {
+	bool retval = true;
 	utable_t::const_iterator cit;
 	cit = inc_table.find(header);
 	if (cit != inc_table.end()) {
 		LOG(INFO) << header << " matched " << cit->first;
 		warnings.push_back( warning_t( line_nr, create_wrong_header_msg( header, cit->second.c_str() ) ) );
+		retval = false;
 	}
-	return;
+	return retval;
 }
 
+// If we find a file which is wrong, remove that entry from the cache so that it will always be scanned
 std::string cppverify::create_wrong_header_msg( const std::string& header, const char* cpp_header )
 {
 	std::ostringstream oss;
 	oss << "Change include of '" << header << "' to '" << cpp_header << "'";
+
 	return oss.str();
 }

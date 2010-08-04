@@ -7,7 +7,7 @@
 
 namespace cppverify {
 
-void check( const file_t& file, warnings_t& warnings, utable_t& inc_table ); // TODO Add options object
+bool check( const file_t& file, warnings_t& warnings, utable_t& inc_table ); // TODO Add options object
 
 }
 

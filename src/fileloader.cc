@@ -76,6 +76,11 @@ void FileLoader::get_homedir(std::string& homedir)
 		}
 	}
 }
+void FileLoader::remove_from_cache(std::string& filename)
+{
+	DLOG(INFO) << "Removing " << filename << " from cache, as it contains invalid headers";
+	_file_cache.erase(filename);
+}
 
 files_t& FileLoader::get_file_list()
 {
@@ -176,6 +181,7 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, bool use_cac
 					if (_file_cache.insert(std::make_pair(full_name, time_modified)).second) {
 						// Insert succeeded
 						LOG(INFO) << "Added: " << full_name;
+						_file_list.push_back(full_name);
 					} else {
 						// we already have this value in the cache, replace the value in this key if timestamps differ
 						if ( _file_cache[full_name] != time_modified ) {
