@@ -45,6 +45,7 @@ public:
 	int show_result( void );
 	int get_filelist_length();
 	int get_total_files();
+	void check_output_xml();
 private:
 	results_t _results;
 	FileLoader _fl;
@@ -132,6 +133,7 @@ int CppVerify::setup_program_options( int argc, char** argv )
 	("remove-cache,r", "remove cache file")
 	("style,s", po::value<std::string>(), "C style to scan for, default C99")
 	("stats,S", "show stats for the run")
+	("xml-output,x", "output XML file with scan results")
 	("include-path,I", po::value<std::vector<std::string> >(), "paths to scan for files");
 	po::positional_options_description p;
 	p.add("include-path", -1);
@@ -323,3 +325,10 @@ int CppVerify::get_total_files()
 	return _fl.get_files_scanned();
 }
 
+void CppVerify::check_output_xml()
+{
+	if (_vm.count("output-xml")) {
+		files_t files = _fl.get_file_list();
+
+	}
+}
