@@ -33,6 +33,7 @@ public:
 	void remove_from_cache(std::string& filename);
 	files_t& get_file_list();
 	void save_cache();
+	int get_files_scanned();
 private:
 	void get_homedir(std::string& homedir);
 	void load_cache();
@@ -40,6 +41,7 @@ private:
 	void prepare_associations();
 	bool check_extensions(const std::string& file_name);
 private:
+	int _files_scanned;
 	files_t _file_list; // Complete filelist
 	cache_t _file_cache;
 	std::set<std::string> _assoc;

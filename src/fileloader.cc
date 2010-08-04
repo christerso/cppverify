@@ -23,7 +23,8 @@
 
 using namespace cppverify;
 
-FileLoader::FileLoader()
+FileLoader::FileLoader():
+		_files_scanned(0)
 {
 	prepare_associations();
 }
@@ -78,7 +79,7 @@ void FileLoader::get_homedir(std::string& homedir)
 }
 void FileLoader::remove_from_cache(std::string& filename)
 {
-	DLOG(INFO) << "Removing " << filename << " from cache, as it contains invalid headers";
+	DLOG(INFO) << "Removing " << filename << " from cache, as it contains C style header";
 	_file_cache.erase(filename);
 }
 
@@ -174,6 +175,7 @@ bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, bool use_cac
 				scan_dirs( itr->path(), use_cache );
 			} else {
 				full_name = itr->path().string();
+				++_files_scanned;
 				if (!check_extensions(full_name)) {
 					continue;
 				}
@@ -221,5 +223,8 @@ bool FileLoader::check_extensions(const std::string& file_name)
 	return false;
 }
 
-
+int FileLoader::get_files_scanned()
+{
+	return _files_scanned;
+}
 

@@ -24,8 +24,8 @@ extern "C" {
 
 // List of TODOs:
 //
-//	Make paths full path (optional)
-//   Add Depth of scan
+//  Add Depth of scan
+//	Add filesize limit to cachefile
 
 
 namespace po = boost::program_options;
@@ -35,16 +35,20 @@ class CppVerify {
 public:
 	CppVerify( void );
 	int setup_program_options( int argc, char** argv );
+
+	bool timed_run( void );
 	int check_program_options( void );
 	void find_files( void );
 	void check_files( void );
 	void check_style( void );
 	int show_result( void );
+	int get_filelist_length();
+	int get_total_files();
 private:
-	results_t results;
-	FileLoader fl;
-	po::options_description opt_desc;
-	po::variables_map vm;
+	results_t _results;
+	FileLoader _fl;
+	po::options_description _opt_desc;
+	po::variables_map _vm;
 	utable_t _inc_table;
 };
 }
@@ -53,10 +57,9 @@ using namespace cppverify;
 
 int main(int argc, char** argv)
 {
-	// Start Timing
+	// Timing setup
 	timeval t1, t2;
 	double elapsed_time;
-	gettimeofday(&t1, NULL);
 
 	//Init google logging
 	google::InitGoogleLogging(argv[0]);
@@ -66,6 +69,9 @@ int main(int argc, char** argv)
 
 	retval = cv.setup_program_options( argc, argv );
 
+	if (cv.timed_run()) {
+		gettimeofday(&t1, NULL);
+	}
 	// check options
 	if ( retval != 0 ) {
 		goto main_exit;
@@ -84,19 +90,20 @@ int main(int argc, char** argv)
 
 main_exit:
 	google::ShutdownGoogleLogging();
-	gettimeofday(&t2, NULL);
-	elapsed_time = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
-	elapsed_time += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
-	std::cout << elapsed_time << " ms." << std::endl;
-
+	if (cv.timed_run()) {
+		gettimeofday(&t2, NULL);
+		elapsed_time = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
+		elapsed_time += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+		std::cout << "Scanned " << cv.get_filelist_length() << " files, out of " << cv.get_total_files() << " in " << elapsed_time << " ms." << std::endl;
+	}
 	return retval;
 }
 
 CppVerify::CppVerify( void ) :
-		results(),
-		fl(),
-		opt_desc("Allowed options"),
-		vm()
+		_results(),
+		_fl(),
+		_opt_desc("Allowed options"),
+		_vm()
 {
 }
 
@@ -115,17 +122,18 @@ int CppVerify::setup_program_options( int argc, char** argv )
 	int retval = 0;
 
 	// Preparing boost command line options
-	opt_desc.add_options()
+	_opt_desc.add_options()
 	("help,h", "show help on commands")
 	("use-cache,c", "cache the files to scan")
 	("c-style,s", po::value<std::string>(), "C style to scan for")
+	("timed-run,t", "show how long time the scan took in ms")
 	("include-path,I", po::value<std::vector<std::string> >(), "paths to scan for files");
 	po::positional_options_description p;
 	p.add("include-path", -1);
 
 	try {
-		po::store(po::command_line_parser(argc, argv).options(opt_desc).positional(p).run(), vm);
-		po::notify(vm);
+		po::store(po::command_line_parser(argc, argv).options(_opt_desc).positional(p).run(), _vm);
+		po::notify(_vm);
 	} catch (std::exception& x) {
 		std::cerr << x.what() << std::endl;
 		retval = -1;
@@ -142,8 +150,8 @@ int CppVerify::check_program_options( void )
 {
 	int retval = 0;
 
-	if ( vm.count("help") ) {
-		std::cout << opt_desc << std::endl;
+	if ( _vm.count("help") ) {
+		std::cout << _opt_desc << std::endl;
 		retval = -1;
 	}
 
@@ -155,16 +163,16 @@ int CppVerify::check_program_options( void )
  */
 void CppVerify::find_files( void )
 {
-	if ( vm.count( "include-path" ) ) {
+	if ( _vm.count( "include-path" ) ) {
 		std::vector<std::string> res;
 		std::vector<std::string> composed_vec;
 		bool use_cache = false;
 
-		if (vm.count("use-cache")) {
+		if (_vm.count("use-cache")) {
 			use_cache = true;
 		}
 
-		res = vm["include-path"].as<std::vector<std::string> >();
+		res = _vm["include-path"].as<std::vector<std::string> >();
 		for (size_t i = 0; i < res.size(); i++) {
 			// Composing full path from shortened paths (might need some improvement)
 			char pathsz[256];
@@ -182,7 +190,7 @@ void CppVerify::find_files( void )
 			composed_vec.push_back(pathstr);
 
 		}
-		fl.run_scan(composed_vec, use_cache);
+		_fl.run_scan(composed_vec, use_cache);
 	} else {
 		DLOG(INFO) << "No directories to check.";
 	}
@@ -195,33 +203,40 @@ void CppVerify::find_files( void )
 void CppVerify::check_files( void )
 {
 	// Loop over all files and check them for warnings/errors
-	BOOST_FOREACH( file_t file, fl.get_file_list() ) {
+	BOOST_FOREACH( file_t file, _fl.get_file_list() ) {
 		warnings_t warnings;
 
 		// TODO send vm to check, is this needed?
 		if (!check( file, warnings, _inc_table )) {
-			fl.remove_from_cache(file);
+			_fl.remove_from_cache(file);
 		}
 
 		if ( !warnings.empty() ) {
-			results.push_back( result_t( file, warnings ) );
+			_results.push_back( result_t( file, warnings ) );
 		}
 	}
-	if (vm.count("use-cache")) {
-		fl.save_cache();
+	if (_vm.count("use-cache")) {
+		_fl.save_cache();
 	}
 	return;
 }
 
+bool CppVerify::timed_run( void )
+{
+	if (_vm.count("timed-run")) {
+		return true;
+	}
+	return false;
+}
 /**
  * Checks which C dialect to scan for
  */
 void CppVerify::check_style( void )
 {
 	cstyles_t style_t = C99;
-	if (vm.count("c-style")) {
+	if (_vm.count("c-style")) {
 		std::string style;
-		style = vm["c-style"].as<std::string> ();
+		style = _vm["c-style"].as<std::string> ();
 		if (!style.compare("99")) {
 			LOG(INFO) << "Scanning conforms to C99";
 			style_t = C99;
@@ -262,8 +277,8 @@ int CppVerify::show_result( void )
 {
 	int retval = 0;
 
-	if ( !results.empty() ) {
-		BOOST_FOREACH( result_t result, results ) {
+	if ( !_results.empty() ) {
+		BOOST_FOREACH( result_t result, _results ) {
 			BOOST_FOREACH( warning_t warning, result.second ) {
 				std::cout << result.first << ":" << warning.line << " - " << warning.msg << std::endl;
 			}
@@ -281,4 +296,14 @@ int CppVerify::show_result( void )
 	}
 
 	return retval;
+}
+
+int CppVerify::get_filelist_length()
+{
+	return _fl.get_file_list().size();
+}
+
+int CppVerify::get_total_files()
+{
+	return _fl.get_files_scanned();
 }
