@@ -34,6 +34,7 @@ public:
 	files_t& get_file_list();
 	void save_cache();
 	int get_files_scanned();
+	void clear_cache();
 private:
 	void get_homedir(std::string& homedir);
 	void load_cache();

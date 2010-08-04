@@ -41,6 +41,7 @@ public:
 	void find_files( void );
 	void check_files( void );
 	void check_style( void );
+	void check_clear_cache();
 	int show_result( void );
 	int get_filelist_length();
 	int get_total_files();
@@ -78,6 +79,9 @@ int main(int argc, char** argv)
 	}
 	// Setup include table, defaulting to C99
 	cv.check_style();
+
+	// Check if we should remove the cache
+	cv.check_clear_cache();
 
 	// Find all files to check
 	cv.find_files();
@@ -124,9 +128,10 @@ int CppVerify::setup_program_options( int argc, char** argv )
 	// Preparing boost command line options
 	_opt_desc.add_options()
 	("help,h", "show help on commands")
-	("use-cache,c", "cache the files to scan")
-	("c-style,s", po::value<std::string>(), "C style to scan for")
-	("timed-run,t", "show how long time the scan took in ms")
+	("cache,c", "cache the files to scan")
+	("remove-cache,r", "remove cache file")
+	("style,s", po::value<std::string>(), "C style to scan for, default C99")
+	("stats,S", "show stats for the run")
 	("include-path,I", po::value<std::vector<std::string> >(), "paths to scan for files");
 	po::positional_options_description p;
 	p.add("include-path", -1);
@@ -168,7 +173,7 @@ void CppVerify::find_files( void )
 		std::vector<std::string> composed_vec;
 		bool use_cache = false;
 
-		if (_vm.count("use-cache")) {
+		if (_vm.count("cache")) {
 			use_cache = true;
 		}
 
@@ -215,7 +220,7 @@ void CppVerify::check_files( void )
 			_results.push_back( result_t( file, warnings ) );
 		}
 	}
-	if (_vm.count("use-cache")) {
+	if (_vm.count("cache")) {
 		_fl.save_cache();
 	}
 	return;
@@ -223,20 +228,21 @@ void CppVerify::check_files( void )
 
 bool CppVerify::timed_run( void )
 {
-	if (_vm.count("timed-run")) {
+	if (_vm.count("stats")) {
 		return true;
 	}
 	return false;
 }
+
 /**
  * Checks which C dialect to scan for
  */
 void CppVerify::check_style( void )
 {
 	cstyles_t style_t = C99;
-	if (_vm.count("c-style")) {
+	if (_vm.count("style")) {
 		std::string style;
-		style = _vm["c-style"].as<std::string> ();
+		style = _vm["style"].as<std::string> ();
 		if (!style.compare("99")) {
 			LOG(INFO) << "Scanning conforms to C99";
 			style_t = C99;
@@ -270,6 +276,15 @@ void CppVerify::check_style( void )
 		}
 	}
 }
+
+
+void CppVerify::check_clear_cache( void )
+{
+	if (_vm.count("remove-cache")) {
+		_fl.clear_cache();
+	}
+}
+
 /**
  * Shows the result of the check(s) to the user.
  */
@@ -307,3 +322,4 @@ int CppVerify::get_total_files()
 {
 	return _fl.get_files_scanned();
 }
+

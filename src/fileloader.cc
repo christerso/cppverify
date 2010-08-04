@@ -88,6 +88,19 @@ files_t& FileLoader::get_file_list()
 	return _file_list;
 }
 
+void FileLoader::clear_cache()
+{
+	std::string homedir;
+	get_homedir(homedir);
+	std::string cachepath(homedir);
+	cachepath.append("/");
+	cachepath.append(CACHE_DIR);
+	cachepath.append("/");
+	cachepath.append(CACHE_FILE);
+	unlink(cachepath.c_str());
+	std::cout << "Removed cachefile: " << cachepath << std::endl;
+}
+
 void FileLoader::load_cache()
 {
 	std::string homedir;
