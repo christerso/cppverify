@@ -38,14 +38,14 @@ bool cppverify::check( const file_t& file, warnings_t& warnings, utable_t& inc_t
 		if ( boost::regex_match( line, what, expr, boost::match_extra ) ) {
 			if ( what.size() == 4 ) {
 				if (!what[2].compare("")) {
-					DLOG(ERROR) << "Found system header '" << what[3] << "' on line " << line_nr;
+					//DLOG(ERROR) << "Found system header '" << what[3] << "' on line " << line_nr;
 					if (!check_header( line_nr, what[3], warnings, inc_table )) {
 						retval = false;
 					}
 				} else {
 					// what[2] matches when the user have used " for the system header
 					// this should also be a warning, as the user should use <> for system headers
-					DLOG(ERROR) << "Found system header '" << what[2] << "' on line " << line_nr;
+					//DLOG(ERROR) << "Found system header '" << what[2] << "' on line " << line_nr;
 					if (!check_header( line_nr, what[2], warnings, inc_table )) {
 						retval = false;
 					}

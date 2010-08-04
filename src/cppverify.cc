@@ -1,11 +1,11 @@
 // own
 #include "common.h"
 #include "fileloader.h"
-
 #include "check.h"
 extern "C" {
 #include "cheaders.h"
 }
+
 // boost
 #include <exception>
 #include <boost/foreach.hpp>
@@ -18,6 +18,10 @@ extern "C" {
 // std
 #include <iostream>
 #include <cctype>
+
+// C headers
+#include <sys/time.h>
+
 // List of TODOs:
 //
 //	Make paths full path (optional)
@@ -49,6 +53,11 @@ using namespace cppverify;
 
 int main(int argc, char** argv)
 {
+	// Start Timing
+	timeval t1, t2;
+	double elapsed_time;
+	gettimeofday(&t1, NULL);
+
 	//Init google logging
 	google::InitGoogleLogging(argv[0]);
 
@@ -75,6 +84,11 @@ int main(int argc, char** argv)
 
 main_exit:
 	google::ShutdownGoogleLogging();
+	gettimeofday(&t2, NULL);
+	elapsed_time = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
+	elapsed_time += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+	std::cout << elapsed_time << " ms." << std::endl;
+
 	return retval;
 }
 
@@ -157,18 +171,21 @@ void CppVerify::find_files( void )
 			std::string pathstr;
 			strncpy(pathsz, res[i].c_str(), res[i].length());
 			if ('.' == res[i].c_str()[0]) {
-				getcwd(pathsz, 256);
+				char* ret = getcwd(pathsz, 256);
+				if (ret == NULL) {
+					LOG(ERROR) << "Unable to get path";
+				}
 				pathstr = pathsz;
 			} else {
 				pathstr = res[i].c_str();
 			}
 			composed_vec.push_back(pathstr);
+
 		}
 		fl.run_scan(composed_vec, use_cache);
 	} else {
 		DLOG(INFO) << "No directories to check.";
 	}
-
 	return;
 }
 
@@ -201,7 +218,7 @@ void CppVerify::check_files( void )
  */
 void CppVerify::check_style( void )
 {
-	cstyles_t style_t;
+	cstyles_t style_t = C99;
 	if (vm.count("c-style")) {
 		std::string style;
 		style = vm["c-style"].as<std::string> ();
@@ -215,8 +232,6 @@ void CppVerify::check_style( void )
 			LOG(INFO) << "Scanning conforms to C89-C90";
 			style_t = C89;
 		}
-	} else {
-		style_t = C99; // Default style if none given
 	}
 
 	switch (style_t) {
