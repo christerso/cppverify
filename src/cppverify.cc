@@ -261,7 +261,7 @@ int CppVerify::show_result( void )
 		}
 	} else {
 		// TODO Should be possible to disable this.
-		std::cout << "No errors" << std::endl;
+		//std::cout << "No errors" << std::endl;
 		// XXX Should an empty xml file be generated in this case?
 	}
 

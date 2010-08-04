@@ -161,7 +161,8 @@ void FileLoader::save_cache()
 
 bool FileLoader::scan_dirs(const boost::filesystem::path& dir_path, bool use_cache)
 {
-	if ( !boost::filesystem::exists(dir_path) ) {
+	if ( !boost::filesystem::exists(dir_path) || !boost::filesystem::is_directory(dir_path) ) {
+		std::cerr << "Invalid path given:\n" << dir_path.string() << std::endl;
 		return false;
 	}
 	std::string full_name;
