@@ -77,7 +77,7 @@ def set_options(opt):
 	opt.add_option('--cppcheck', default=False, dest='cppcheck', action='store_true')
 	opt.add_option('--static', default=False, dest='static', action='store_true')
 
-	opt.add_option('--build_kind', action='store', default='release', help='build the selected variants')
+	opt.add_option('--build_kind', action='store', default='debug', help='build the selected variants')
 
 def configure(conf):
 	conf.env.FULLSTATIC = Options.options.static
@@ -122,10 +122,10 @@ def configure(conf):
 		conf.set_env_name(name, env)
 	
 	conf.setenv( 'debug' )
-	conf.env.CXXFLAGS = [ '-g', '-Wall', '-Wextra', '-pedantic', '-std=c++0x', ]
+	conf.env.CXXFLAGS = [ '-g', '-Wall', '-Wextra', '-pedantic', '-std=c++0x', '-pipe' ]
 
 	conf.setenv( 'release' )
-	conf.env.CXXFLAGS = [ '-Wall', '-Wextra', '-pedantic', '-O2', '-std=c++0x', ]
+	conf.env.CXXFLAGS = [ '-Wall', '-fomit-frame-pointer', '-Wextra', '-pedantic', '-O2', '-std=c++0x', '-pipe' ]
 
 	conf.setenv( 'default' )
 

@@ -17,6 +17,7 @@
 // defines
 #define CACHE_DIR ".cache"
 #define CACHE_FILE "cppverify"
+#define DEFAULT_XML_OUTPUT_FILE "cppverify.xml"
 
 namespace cppverify {
 

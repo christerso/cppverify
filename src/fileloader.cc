@@ -67,6 +67,8 @@ void FileLoader::run_scan(std::vector<std::string>& file_paths, bool use_cache)
 // If that also fails take the current directory.
 void FileLoader::get_homedir(std::string& homedir)
 {
+	// Note that valgrind do not realise that this is a static structure in the data segment
+	// therefore it should not be deallocated.
 	struct passwd *pwd;
 	pwd = getpwuid(getuid());
 	homedir = pwd->pw_dir;

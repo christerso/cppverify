@@ -7,17 +7,23 @@ extern "C" {
 }
 
 // boost
-#include <exception>
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 
 // c++ tr1
-#include <tr1/unordered_map>
+#include <tr1/unordered_map>	// Note this includes the unordered_multimap
+
+// RapidXML
+#include "rapidxml/rapidxml.hpp"
+#include "rapidxml/rapidxml_utils.hpp"
+#include "rapidxml/rapidxml_print.hpp"
+#include "rapidxml/rapidxml_iterators.hpp"
 
 // std
 #include <iostream>
 #include <cctype>
+#include <exception>
 
 // C headers
 #include <sys/time.h>
@@ -29,6 +35,7 @@ extern "C" {
 
 
 namespace po = boost::program_options;
+namespace xml = rapidxml;
 
 namespace cppverify {
 class CppVerify {
@@ -43,15 +50,18 @@ public:
 	void check_style( void );
 	void check_clear_cache();
 	int show_result( void );
-	int get_filelist_length();
-	int get_total_files();
-	void check_output_xml();
+	int get_filelist_length( void );
+	int get_total_files( void );
+	bool check_output_xml( void );
+	void check_xml_output_path( void );
+	void save_xml( void );
 private:
 	results_t _results;
 	FileLoader _fl;
 	po::options_description _opt_desc;
 	po::variables_map _vm;
 	utable_t _inc_table;
+	std::string _xml_output_path;
 };
 }
 
@@ -90,8 +100,16 @@ int main(int argc, char** argv)
 	// check files
 	cv.check_files();
 
+	// Check if we are to save the result as XML
+	cv.check_output_xml();
+
+	// Check if we have been given an output path for the XML
+	cv.check_xml_output_path();
+
 	// Present the result
 	retval = cv.show_result();
+
+
 
 main_exit:
 	google::ShutdownGoogleLogging();
@@ -134,6 +152,7 @@ int CppVerify::setup_program_options( int argc, char** argv )
 	("style,s", po::value<std::string>(), "C style to scan for, default C99")
 	("stats,S", "show stats for the run")
 	("xml-output,x", "output XML file with scan results")
+	("xml-output-path,O", po::value<std::string>(), "XML output path/filename")
 	("include-path,I", po::value<std::vector<std::string> >(), "paths to scan for files");
 	po::positional_options_description p;
 	p.add("include-path", -1);
@@ -248,7 +267,7 @@ void CppVerify::check_style( void )
 		if (!style.compare("99")) {
 			LOG(INFO) << "Scanning conforms to C99";
 			style_t = C99;
-		} else if (!style.compare("95") || !style.compare("C95")) {
+		} else if (!style.compare("95") || !style.compare("95")) {
 			LOG(INFO) << "Scanning conforms to C94-C95";
 			style_t = C95;
 		} else if (!style.compare("89") || !style.compare("90")) {
@@ -301,6 +320,7 @@ int CppVerify::show_result( void )
 			}
 		}
 		// TODO Present/Generate result
+		// If XML output is wanted, write the result to an XML file.
 
 		// TODO if retval should be none zero when any warning are found, add it here
 		if ( false ) {
@@ -315,7 +335,7 @@ int CppVerify::show_result( void )
 	return retval;
 }
 
-int CppVerify::get_filelist_length()
+int CppVerify::get_filelist_length( void )
 {
 	return _fl.get_file_list().size();
 }
@@ -325,10 +345,78 @@ int CppVerify::get_total_files()
 	return _fl.get_files_scanned();
 }
 
-void CppVerify::check_output_xml()
+bool CppVerify::check_output_xml( void )
 {
-	if (_vm.count("output-xml")) {
-		files_t files = _fl.get_file_list();
+	if (_vm.count("xml-output")) {
+		save_xml();
+	}
+	return false;
+}
 
+void CppVerify::check_xml_output_path( void )
+{
+	if (_vm.count("xml-output-path")) {
+		_xml_output_path = _vm["xml-output-path"].as<std::string>();
+	} else {
+		_xml_output_path = DEFAULT_XML_OUTPUT_FILE;
 	}
 }
+
+/*
+ * <cppverify>
+ * <
+ * </cppverify>
+ */
+void CppVerify::save_xml( void )
+{
+	std::string xmlfile;
+	// Start node
+	xml::xml_document<> doc;
+	std::stringstream ss;
+	std::string strconv;
+	xml::xml_node<>* decl = doc.allocate_node(xml::node_declaration);
+	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
+	decl->append_attribute(doc.allocate_attribute("encoding", "utf-8"));
+	doc.append_node(decl);
+	// root node
+	xml::xml_node<>* root = doc.allocate_node(xml::node_element, "cppverify");
+	root->append_attribute(doc.allocate_attribute("version", "1.0"));
+	doc.append_node(root);
+	BOOST_FOREACH( result_t result, _results ) {
+		BOOST_FOREACH( warning_t warning, result.second ) {
+			xml::xml_node<>* res = doc.allocate_node(xml::node_element, "result");
+			root->append_node(res);
+			xml::xml_node<>* inc_file = doc.allocate_node(xml::node_element, "file");
+			res->append_node(inc_file);
+
+			// std::cout << result.first << ":" << warning.line << " - " << warning.msg << std::endl;
+			char *node_name = doc.allocate_string(result.first.c_str());        // Allocate string and copy name into it
+			xml::xml_node<>* nodeval = doc.allocate_node(xml::node_data, 0, node_name);  // Set node name to node_name
+			inc_file->append_node(nodeval);
+
+			xml::xml_node<>* line = doc.allocate_node(xml::node_element, "line");
+			res->append_node(line);
+			// this is faster than using boost::lexical_cast as boost will open a new stream for every call through the loop
+			// now we only open it once
+			ss << warning.line;
+			ss >> strconv;
+			ss << "";
+			ss.clear();
+			char *line_string = doc.allocate_string(strconv.c_str());        // Allocate string and copy name into it
+			xml::xml_node<>* node_lineval = doc.allocate_node(xml::node_data, 0, line_string);  // Set node name to node_name
+			line->append_node(node_lineval);
+
+			xml::xml_node<>* message = doc.allocate_node(xml::node_element, "message");
+			res->append_node(message);
+			char *message_string = doc.allocate_string(warning.msg.c_str());        // Allocate string and copy name into it
+			xml::xml_node<>* node_message = doc.allocate_node(xml::node_data, 0, message_string);  // Set node name to node_name
+			message->append_node(node_message);
+		}
+	}
+	xml::print(std::back_inserter(xmlfile), doc, 0);
+	check_xml_output_path();
+	std::ofstream ofs(_xml_output_path.c_str());
+	ofs << xmlfile.c_str();
+	ofs.close();
+}
+

@@ -75,7 +75,7 @@ bool cppverify::check_header( uint32_t line_nr, const std::string& header, warni
 std::string cppverify::create_wrong_header_msg( const std::string& header, const char* cpp_header )
 {
 	std::ostringstream oss;
-	oss << "Change include of '" << header << "' to '" << cpp_header << "'";
+	oss << "Change include of " << header << " to " << cpp_header;
 
 	return oss.str();
 }
