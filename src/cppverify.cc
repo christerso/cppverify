@@ -362,11 +362,6 @@ void CppVerify::check_xml_output_path( void )
 	}
 }
 
-/*
- * <cppverify>
- * <
- * </cppverify>
- */
 void CppVerify::save_xml( void )
 {
 	std::string xmlfile;
